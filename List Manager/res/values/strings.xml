@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">List Manager</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="add_task">Add Task</string>
+    <string name="refresh">Refresh</string>
+    <string name="manage_lists">Manage Lists</string>
+    <string name="google_account">Google Account</string>
+    <string name="email_list">Email List</string>
+    <string name="title_activity_add_task">AddTask</string>
+    <string name="item_name">Item Name</string>
+    <string name="save">Save</string>
+    <string name="dlgTask_title">TODO</string>
+    <string name="dlgTask_markComplete">Mark as completed</string>
+    <string name="dlgTask_delete">Delete</string>
+    <string name="price">Price</string>
+    <string name="dueDate">Due Date</string>
+    <string name="cancel">Cancel</string>
+    <string name="showDetails">Edit</string>
+    <string name="update">Update</string>
+    
+
+
+</resources>
