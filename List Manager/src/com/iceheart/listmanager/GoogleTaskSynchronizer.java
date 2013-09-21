@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -19,16 +20,34 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.util.ServiceException;
 
 /**
+ * Class responsible to synchronize the task list with the google spreadsheet.
+ * This operation is done in background.
  * @author Luc Martineau
  *
  */
 public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 	
+	private ProgressDialog progressDialog;
+	private MainActivity taskListActivity;
+	
+	public GoogleTaskSynchronizer( MainActivity activity ) {
+		this.taskListActivity = activity;
+		progressDialog = new ProgressDialog( activity);
+	}
+	
+	/**
+	 * @Return a boolean indicating if the synchronization has been completed or not.
+	 */
 	@Override
 	protected Boolean doInBackground(Context... params) {
 		
 		Context context = params[0];
 		
+		// TODO: Check if there is an Internet connection available or not.
+		boolean internetConnectionAvailable = true;
+		if ( !internetConnectionAvailable ) {
+			return Boolean.FALSE;
+		}
 		
 		SharedPreferences sharedPreferences = context.getSharedPreferences("listManager",  0 );
 		long lastSynchronisation = sharedPreferences.getLong( "lastSynchronisation", -1 );
@@ -60,8 +79,10 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 				}
 				ds.delete( localTask );
 			} else if ( localTask.getLastSynchroDate() == null || localTask.getLastSynchroDate().getTime() <= lastSynchronisation ) {
-				googleTask.setId( localTask.getId() );
-				googleTask = ds.save( googleTask );
+				if ( !localTask.equals( googleTask ) ) {
+					googleTask.setId( localTask.getId() );
+					googleTask = ds.save( googleTask );
+				}
 			} else {
 				updateTaskEntry(taskEntry, localTask);
 			}
@@ -105,7 +126,9 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		// TODO: Refresh the list if posible ?
 //		((MainActivity) context).refreshList();
 		
-		return true;
+		
+		
+		return Boolean.TRUE;
 		
 		
 		
@@ -151,8 +174,8 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		try {
 			// TODO: Store the google account information in the sharedPrefereces.
 			SharedPreferences sharedPreferences = context.getSharedPreferences("listManager",  0 );
-			String googleAccount = sharedPreferences.getString( "googleAccount", "toto@gmail.com" );
-			String googlePassword = sharedPreferences.getString( "googlePassword", "your password" );
+			String googleAccount = sharedPreferences.getString( "googleAccount", "lmartineau@gmail.com" );
+			String googlePassword = sharedPreferences.getString( "googlePassword", "<password>" );
 			String listFeedString = sharedPreferences.getString( "googleListFeed", "" );
 
             SpreadsheetService service = new SpreadsheetService("Testing");
@@ -217,6 +240,19 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
             e.printStackTrace();
             return null;
         }		
-	}	
+	}
+	
+	@Override
+	protected void onPreExecute() {
+		progressDialog.setTitle( "Synchronization");
+		progressDialog.setMessage( "Synchronizing with google drive...");
+		progressDialog.show();
+	}
+	
+	@Override
+	protected void onPostExecute(Boolean result) {
+		progressDialog.dismiss();
+		taskListActivity.refreshList();
+	}
 
 }

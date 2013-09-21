@@ -31,17 +31,14 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.taskList);        
         
+        refreshList();
         
         // TODO: Settings to synchronize or not.
-        // TODO: Dialog to show that refresh is in progress.
         if ( firstLoad ) {
-        	GoogleTaskSynchronizer synchronizer = new GoogleTaskSynchronizer();
+        	GoogleTaskSynchronizer synchronizer = new GoogleTaskSynchronizer( this);
         	synchronizer.execute( this );
             firstLoad = false;
         }
-        
-
-        refreshList();
         
         listView.setOnItemClickListener(new OnItemClickListener() {
         	
@@ -50,8 +47,20 @@ public class MainActivity extends Activity {
 			Map<String,String> selectedTask = (Map<String,String>) (listView.getItemAtPosition(myItemInt));
               showTaskDialog( selectedTask );
 
-            }                 
-      });        
+            }
+        });
+        
+    }
+    
+    /**
+     * Synchronize The Task list with the google account.
+     * 
+     * @param menuItem The menu item calling this action.
+     */
+    public void synchronizeWithGoogle( MenuItem menuItem ) {
+    	
+    	GoogleTaskSynchronizer synchronizer = new GoogleTaskSynchronizer( this );
+         synchronizer.execute( this );
     }
 
 	public void refreshList() {

@@ -15,6 +15,7 @@ public class Task implements Serializable {
 	
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy/MM/dd", Locale.CANADA_FRENCH );
 	public static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat( "yyyy/MM/dd hh:mm:ss", Locale.CANADA_FRENCH );
+	public static final SimpleDateFormat FUNCTIONALID_FORMAT = new SimpleDateFormat( "yyyyMMddhhmmss", Locale.CANADA_FRENCH );
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -33,7 +34,7 @@ public class Task implements Serializable {
 	public String getFunctionalId() {
 		String functionalId = name;
 		if ( getCreationDate() != null ) {
-			functionalId += "|" + getCreationDate().getTime();
+			functionalId += "|" + FUNCTIONALID_FORMAT.format( getCreationDate() );
 		}
 		return functionalId;
 	} 
@@ -208,7 +209,7 @@ public class Task implements Serializable {
 		try {
 			setCompletedDate( DATE_FORMAT.parse( value ) ); 
 		} catch ( Exception e ) {
-			setDueDate( (Date) null );
+			setCompletedDate( (Date) null );
 		}
 		
 	}
