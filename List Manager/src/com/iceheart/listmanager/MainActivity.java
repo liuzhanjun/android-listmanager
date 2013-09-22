@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,7 +30,17 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        listView = (ListView) findViewById(R.id.taskList);        
+        listView = (ListView) findViewById(R.id.taskList);
+        
+        
+        
+		SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
+		if ( googleAccount.isEmpty() ) {
+			openSettings(null);
+			return;
+		}
+
         
         refreshList();
         
@@ -151,10 +162,11 @@ public class MainActivity extends Activity {
     	dialog.show();
     			 
 	}
-
 	
-	
-	
+	public void openSettings( MenuItem menuItem ) {
+		Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity( intent );
+	}
     
     
 }

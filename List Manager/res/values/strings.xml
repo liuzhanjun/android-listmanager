@@ -20,7 +20,9 @@
     <string name="cancel">Cancel</string>
     <string name="showDetails">Edit</string>
     <string name="update">Update</string>
-    
-
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="googleAccount">Google Account</string>
+    <string name="password">Password</string>
+    <string name="synchronize">Synchronize</string>
 
 </resources>

@@ -1,6 +1,5 @@
 package com.iceheart.listmanager;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,6 @@ import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
-import com.google.gdata.util.ServiceException;
 
 /**
  * Class responsible to synchronize the task list with the google spreadsheet.
@@ -49,8 +47,8 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 			return Boolean.FALSE;
 		}
 		
-		SharedPreferences sharedPreferences = context.getSharedPreferences("listManager",  0 );
-		long lastSynchronisation = sharedPreferences.getLong( "lastSynchronisation", -1 );
+		SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+		long lastSynchronisation = sharedPreferences.getLong( ApplicationSettings.LAST_SYNCHRONIZATION, -1 );
 		
 		
 		TaskDatasource ds = new TaskDatasource( context);
@@ -62,6 +60,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		}
 		
 		ListFeed tasksFromGoogle = readGoogleSpreadsheet(context);
+		
 		
 		for ( ListEntry taskEntry: tasksFromGoogle.getEntries() ) {
 			Task googleTask = listEntryToTask( taskEntry );
@@ -101,11 +100,8 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 				updateTaskEntry( entry, localTask );
 		            try {
 						tasksFromGoogle.insert( entry );
-					} catch (ServiceException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
+					} catch (Exception e) {
+						// TODO Exception handling
 						e.printStackTrace();
 					}
 				
@@ -117,15 +113,11 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		 * Update the synchronisation timestamp
 		 */
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putLong("lastSynchronisation", System.currentTimeMillis() );
+        editor.putLong(ApplicationSettings.LAST_SYNCHRONIZATION, System.currentTimeMillis() );
         editor.apply();
         editor.commit();
 		
 		ds.close();
-		
-		// TODO: Refresh the list if posible ?
-//		((MainActivity) context).refreshList();
-		
 		
 		
 		return Boolean.TRUE;
@@ -172,11 +164,10 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 	
 	protected ListFeed readGoogleSpreadsheet( Context context) {
 		try {
-			// TODO: Store the google account information in the sharedPrefereces.
-			SharedPreferences sharedPreferences = context.getSharedPreferences("listManager",  0 );
-			String googleAccount = sharedPreferences.getString( "googleAccount", "lmartineau@gmail.com" );
-			String googlePassword = sharedPreferences.getString( "googlePassword", "<password>" );
-			String listFeedString = sharedPreferences.getString( "googleListFeed", "" );
+			SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+			String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
+			String googlePassword = sharedPreferences.getString( ApplicationSettings.GOOGLE_PASSWORD, "" );
+			String listFeedString = sharedPreferences.getString( ApplicationSettings.GOOGLE_LIST_FEED, "" );
 
             SpreadsheetService service = new SpreadsheetService("Testing");
             service.setUserCredentials(googleAccount, googlePassword);
