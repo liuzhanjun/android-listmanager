@@ -1,34 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
-    android:padding="4dip"
-    android:textAlignment="textEnd" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="4dp"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+>
 
-        <TextView
-            android:id="@+id/rowItemName"
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical" />
+    <TextView
+        android:id="@+id/rowItemName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="90dp" />
 
-        
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="75dp"
+        android:layout_height="fill_parent"
+        android:layout_gravity="right"
+        android:showDividers="middle"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true">
+
         <TextView
             android:id="@+id/rowItemDate"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="marquee"
-            android:singleLine="true" />
-        
-        <TextView
-            android:id="@+id/rowItemPrice"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:ellipsize="marquee"
             android:singleLine="true"
-            android:textAlignment="textEnd" />
-        
-        
+            android:layout_gravity="fill|top"
+            android:numeric="decimal" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/rowItemPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:layout_gravity="fill|bottom"
+            android:textAlignment="textEnd"
+            android:autoText="true" />
+    </LinearLayout>
+
+</RelativeLayout>
