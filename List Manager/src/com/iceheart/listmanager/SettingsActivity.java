@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 public class SettingsActivity extends Activity {
@@ -21,14 +22,19 @@ public class SettingsActivity extends Activity {
 		 * Load the information from the SharedPreferences.
 		 */
 		SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+		
 		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT,  "" );
 		EditText googleAccountText = (EditText) findViewById(R.id.txtGoogleAccount);
 		googleAccountText.setText( googleAccount );
 		googleAccountText.requestFocus();
+		
 		String googlePassword = sharedPreferences.getString( ApplicationSettings.GOOGLE_PASSWORD,  "" );
 		EditText googlePasswordText = (EditText) findViewById(R.id.txtPassword);
 		googlePasswordText.setText( googlePassword );
 		
+		boolean syncOnStartup = sharedPreferences.getBoolean( ApplicationSettings.SYNC_ON_STARTUP,  Boolean.TRUE );
+		CheckBox syncCheckbox = (CheckBox) findViewById(R.id.chkSyncOnStartup);
+		syncCheckbox.setChecked( syncOnStartup );
 	}
 
 	@Override
@@ -50,14 +56,18 @@ public class SettingsActivity extends Activity {
 		
 		EditText googleAccountText = (EditText) findViewById(R.id.txtGoogleAccount);
 		String googleAccount =  googleAccountText.getText().toString();
+        editor.putString( ApplicationSettings.GOOGLE_ACCOUNT, googleAccount );
+		
 		EditText passwordText = (EditText) findViewById(R.id.txtPassword);
 		String googlePassword =  passwordText.getText().toString();
-		
-        editor.putString( ApplicationSettings.GOOGLE_ACCOUNT, googleAccount );
         editor.putString( ApplicationSettings.GOOGLE_PASSWORD, googlePassword );
+        
+		CheckBox syncCheckbox = (CheckBox) findViewById(R.id.chkSyncOnStartup);
+		boolean syncOnStartup =  syncCheckbox.isChecked();
+        editor.putBoolean( ApplicationSettings.SYNC_ON_STARTUP, syncOnStartup );
+        
         editor.apply();
         editor.commit();
-
 		
 		Intent intent = new Intent(this, MainActivity.class);
 		startActivity(intent );

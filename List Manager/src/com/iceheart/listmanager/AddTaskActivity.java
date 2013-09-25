@@ -30,6 +30,7 @@ public class AddTaskActivity extends Activity {
 		
 		EditText editName = (EditText) findViewById(R.id.editItemName);
 		editName.setText( task.getName() == null ? "": task.getName() );
+		editName.requestFocus();
 		
 		EditText price = (EditText) findViewById(R.id.editPrice);
 		price.setText( task.getEstimatedPrice() == null ? "":  task.getEstimatedPrice().toPlainString() );

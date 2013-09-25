@@ -41,13 +41,16 @@ public class MainActivity extends Activity {
 			return;
 		}
 
-        
         refreshList();
         
-        // TODO: Settings to synchronize or not.
+        /*
+         * Google Synchronization on startup (If settings says so)
+         */
         if ( firstLoad ) {
-        	GoogleTaskSynchronizer synchronizer = new GoogleTaskSynchronizer( this);
-        	synchronizer.execute( this );
+        	if ( sharedPreferences.getBoolean( ApplicationSettings.SYNC_ON_STARTUP, Boolean.TRUE ) ) {
+            	GoogleTaskSynchronizer synchronizer = new GoogleTaskSynchronizer( this);
+            	synchronizer.execute( this );
+        	}
             firstLoad = false;
         }
         
