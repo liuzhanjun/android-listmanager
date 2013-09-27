@@ -28,10 +28,12 @@
         </activity>
         <activity
             android:name="com.iceheart.listmanager.AddTaskActivity"
+            android:parentActivityName="com.iceheart.listmanager.MainActivity"
             android:label="@string/title_activity_add_task" >
         </activity>
         <activity
             android:name="com.iceheart.listmanager.SettingsActivity"
+            android:parentActivityName="com.iceheart.listmanager.MainActivity"
             android:label="@string/title_activity_settings" >
         </activity>
     </application>

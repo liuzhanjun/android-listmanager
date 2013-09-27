@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,10 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.SpinnerAdapter;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity  {
 	
 	private List<Task> tasks;
 	private static boolean firstLoad = true;
@@ -32,9 +36,12 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.taskList);
         
+        TagListSpinnerAdaptor spinner = new TagListSpinnerAdaptor( this );
+       	getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+       	getActionBar().setListNavigationCallbacks(spinner, spinner);
+       	getActionBar().setDisplayShowTitleEnabled( false );
         
-        
-		SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+        SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
 		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
 		if ( googleAccount.isEmpty() ) {
 			openSettings(null);
@@ -76,11 +83,21 @@ public class MainActivity extends Activity {
     	GoogleTaskSynchronizer synchronizer = new GoogleTaskSynchronizer( this );
          synchronizer.execute( this );
     }
-
+    
 	public void refreshList() {
+		refreshList( null );
+	}
+    
+
+	public void refreshList( String tagName ) {
 		TaskDatasource ds = new TaskDatasource( this);
         ds.open();
-        tasks = ds.getAllActiveTasks();
+        
+        if ( tagName == null ) {
+            tasks = ds.getAllActiveTasks();
+        } else {
+            tasks = ds.findActiveTasksByTag( tagName );
+        }
         ds.close();
         
         
@@ -170,6 +187,6 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity( intent );
 	}
-    
+
     
 }

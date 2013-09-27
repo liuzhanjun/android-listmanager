@@ -22,6 +22,7 @@ public class AddTaskActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.add_task);
+		getActionBar().setDisplayHomeAsUpEnabled( true );
 		if ( getIntent().getExtras() != null && getIntent().getExtras().containsKey( "task" ) ) {
 			this.task = (Task) getIntent().getExtras().get( "task");
 		} else {

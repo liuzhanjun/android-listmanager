@@ -178,4 +178,22 @@ public class TaskDatasource {
 	    cursor.close();
 	    return task;
 	}
+
+	public List<Task> findActiveTasksByTag(String tagName) {
+	    List<Task> tasks = new ArrayList<Task>();
+
+	    Cursor cursor = database.rawQuery( "select * from task " +
+	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
+	    								   "and tags like '%"+tagName+"%'", null);
+
+	    cursor.moveToFirst();
+	    while (!cursor.isAfterLast()) {
+	      Task task = cursorToTask(cursor);
+	      tasks.add(task);
+	      cursor.moveToNext();
+	    }
+	    // Make sure to close the cursor
+	    cursor.close();
+	    return tasks;
+	}
 } 
