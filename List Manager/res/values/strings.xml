@@ -31,5 +31,8 @@
         <item>Venus</item>
         <item>Earth</item>
     </string-array>
+        <string name="Notes">Notes</string>
+        <string name="tags">Tags</string>
+        <string name="date">Date</string>
 
 </resources>

@@ -15,10 +15,10 @@ public class TagListSpinnerAdaptor extends BaseAdapter implements OnNavigationLi
 	
 	// TODO: Implement the tags management screen to make it dynamic.
 	
-	private MainActivity activity;
+	private Activity activity;
 	private List<String> tags = Arrays.asList(new String[] { "ALL Tasks", "TODO", "Maison", "List Manager"});
 	
-	public TagListSpinnerAdaptor( MainActivity activity) {
+	public TagListSpinnerAdaptor( Activity activity) {
 		super();
 		this.activity = activity;
 	}
@@ -53,11 +53,11 @@ public class TagListSpinnerAdaptor extends BaseAdapter implements OnNavigationLi
 	@Override
 	public boolean onNavigationItemSelected(int index, long itemId ) {
 		if ( index == 0 ) {
-			activity.refreshList();
+			((MainActivity)activity).refreshList();
 			
 		} else {
 			String tagName = tags.get( index );
-			activity.refreshList( tagName );
+			((MainActivity)activity).refreshList( tagName );
 			
 		}
 		return true;

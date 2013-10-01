@@ -11,18 +11,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".AddTaskActivity" >
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/item_name" />
-
     <EditText
         android:id="@+id/editItemName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/textView1"
-        android:layout_toRightOf="@+id/textView1"
         android:ems="10"
         android:hint="The task name"
         android:inputType="text" />
@@ -31,7 +23,6 @@
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="40dp"
         android:onClick="save"
@@ -56,48 +47,57 @@
         android:layout_marginTop="14dp"
         android:ems="10"
         android:hint="Estimated Price"
-        android:inputType="numberDecimal" >
+        android:inputType="numberDecimal"
+        android:textAlignment="textEnd" >
 
         <requestFocus />
     </EditText>
-
-    <TextView
-        android:id="@+id/textPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_alignTop="@+id/editPrice"
-        android:text="@string/price"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:id="@+id/textDueDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textPrice"
-        android:layout_below="@+id/editPrice"
-        android:layout_marginTop="25dp"
-        android:text="@string/dueDate"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
         android:id="@+id/editDueDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/editPrice"
-        android:layout_alignTop="@+id/textDueDate"
+        android:layout_below="@+id/editPrice"
+        android:layout_marginTop="21dp"
+        android:clickable="false"
         android:ems="10"
-        android:inputType="none" />
+        android:enabled="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:hint="@string/dueDate"
+        android:inputType="none"
+        android:linksClickable="false" />
 
     <Button
         android:id="@+id/btnDueDate"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/editDueDate"
-        android:layout_alignBottom="@+id/editDueDate"
-        android:layout_alignRight="@+id/editDueDate"
+        android:layout_alignTop="@+id/editDueDate"
+        android:layout_toRightOf="@+id/editDueDate"
         android:onClick="changeDueDate"
-        android:text="@string/update" />
+        android:text="@string/date" />
+
+    <EditText
+        android:id="@+id/editNotes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnDueDate"
+        android:layout_marginTop="55dp"
+        android:layout_toLeftOf="@+id/btnDueDate"
+        android:ems="10"
+        android:hint="@string/Notes"
+        android:inputType="textMultiLine" />
+
+    <EditText
+        android:id="@+id/editTags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/editNotes"
+        android:layout_below="@+id/btnDueDate"
+        android:layout_marginTop="14dp"
+        android:ems="10"
+        android:hint="@string/tags" />
 
 </RelativeLayout>

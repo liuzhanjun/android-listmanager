@@ -109,7 +109,10 @@ public class TaskDatasource {
   public List<Task> getAllActiveTasks() {
 	    List<Task> tasks = new ArrayList<Task>();
 
-	    Cursor cursor = database.rawQuery( "select * from task where status = '" + TaskStatus.ACTIVE.name() + "'", null);
+	    Cursor cursor = database.rawQuery( 
+	    		"select * from task " +
+	    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
+	    		"order by due_date, creation_date", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
@@ -184,7 +187,8 @@ public class TaskDatasource {
 
 	    Cursor cursor = database.rawQuery( "select * from task " +
 	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
-	    								   "and tags like '%"+tagName+"%'", null);
+	    								   "and tags like '%"+tagName+"%' " +
+	    								   "order by due_date, creation_date", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {

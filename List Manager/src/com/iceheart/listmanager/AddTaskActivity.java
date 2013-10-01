@@ -3,6 +3,7 @@ package com.iceheart.listmanager;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -13,6 +14,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 public class AddTaskActivity extends Activity {
 	
@@ -39,10 +41,13 @@ public class AddTaskActivity extends Activity {
 		EditText dueDate = (EditText) findViewById(R.id.editDueDate);
 		dueDate.setText( task.getDueDate() == null ? "":  Task.DATE_FORMAT.format( task.getDueDate() ) );
 
+		EditText notes = (EditText) findViewById(R.id.editNotes);
+		notes.setText( task.getNotes() == null ? "":  task.getNotes() );
 		
-		// TODO: Populate the task information on the form.
-		
-		
+		// TODO: Tags Management: List to choose
+		EditText tags = (EditText) findViewById(R.id.editTags);
+		tags.setText( task.getTagsAsString() == null ? "":  task.getTagsAsString() );
+
 	}
 	
 	@Override
@@ -70,7 +75,11 @@ public class AddTaskActivity extends Activity {
 		EditText dueDate = (EditText) findViewById(R.id.editDueDate);
 		task.setDueDate( dueDate.getText().toString() );
 		
-		// TODO: All fields
+		EditText notes = (EditText) findViewById(R.id.editNotes);
+		task.setNotes(notes.getText().toString() );
+
+		EditText tags = (EditText) findViewById(R.id.editTags);
+		task.setTags( tags.getText().toString() );
 		
 		task.setLastSynchroDate( new Date() );
 
