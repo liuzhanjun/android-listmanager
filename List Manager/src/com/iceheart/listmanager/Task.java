@@ -28,7 +28,7 @@ public class Task implements Serializable {
 	private Date lastSynchroDate;
 	private BigDecimal estimatedPrice;
 	private BigDecimal realPrice;
-	private List<String> tags;
+	private List<String> tags = new ArrayList<String>();
 	private TaskStatus status = TaskStatus.ACTIVE;
 	
 	public String getFunctionalId() {
