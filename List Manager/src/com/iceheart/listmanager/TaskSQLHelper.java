@@ -14,13 +14,14 @@ import android.util.Log;
  */
 public class TaskSQLHelper extends SQLiteOpenHelper {
 	
-	
 	public static final String TABLE_TASK = "task";
+	public static final String TABLE_TAG = "tag";
+	
 
 	private static final String DATABASE_NAME = "listmanagement.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 5;
 
-	private static final String DATABASE_CREATE = 
+	private static final String CREATE_TASK = 
 			"create table task ( " +
 			" id integer primary key autoincrement, " +
 			" name text, " +
@@ -34,6 +35,14 @@ public class TaskSQLHelper extends SQLiteOpenHelper {
 			" status text," +
 			" creation_date numeric " +
 			");";
+	
+	private static final String CREATE_TAG = 
+			"create table tag ( " +
+			" name text, " +
+			" last_synchro_date numeric " +			
+			");";
+	
+
       
 
   public TaskSQLHelper(Context context) {
@@ -42,13 +51,15 @@ public class TaskSQLHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase database) {
-    database.execSQL(DATABASE_CREATE);
+    database.execSQL(CREATE_TASK);
+    database.execSQL(CREATE_TAG);
   }
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     Log.w(TaskSQLHelper.class.getName(), "Upgrading database from version " + oldVersion + " to " + newVersion );
     db.execSQL("DROP TABLE IF EXISTS task"  );
+    db.execSQL("DROP TABLE IF EXISTS tag"  );
     onCreate(db);
   }
 

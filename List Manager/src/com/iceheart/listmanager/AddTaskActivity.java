@@ -1,24 +1,29 @@
 package com.iceheart.listmanager;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Spinner;
 
 public class AddTaskActivity extends Activity {
 	
 	private Task task;
+	private List<Tag> tags;
+	private EditText tagsEditText;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +49,67 @@ public class AddTaskActivity extends Activity {
 		EditText notes = (EditText) findViewById(R.id.editNotes);
 		notes.setText( task.getNotes() == null ? "":  task.getNotes() );
 		
-		// TODO: Tags Management: List to choose
-		EditText tags = (EditText) findViewById(R.id.editTags);
-		tags.setText( task.getTagsAsString() == null ? "":  task.getTagsAsString() );
+		tagsEditText = (EditText) findViewById(R.id.editTags);
+		tagsEditText.setText( task.getTagsAsString() == null ? "":  task.getTagsAsString() );
+		
+		tags = new ArrayList<Tag>();
+		
+		 TagDatasource ds = new TagDatasource( this );
+	     ds.open();
+	     tags = ds.getTags();
+	     ds.close();
+		
+		// TODO: Call the dao.
+		tags.add( new Tag( "Maison"));
+		tags.add( new Tag( "TODO"));
+		tags.add( new Tag( "Job"));
+		tags.add( new Tag( "List Manager"));
+		
+		for ( Tag tag: tags ) {
+			if ( task.getTags().contains( tag.getName() ) ) {
+				tag.setSelected( true );
+			}
+		}
 
 	}
+	
+	public void chooseTags( View view ) {
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder( this );
+		builder.setCancelable(true);
+		final String[] items = new String[ tags.size() ];
+		final boolean[] checked = new boolean[ tags.size() ];
+		int i = 0;
+		for ( Tag tag: tags ) {
+			items[ i ] = tag.getName();
+			checked[ i ] = tag.isSelected();
+			i++;
+		}
+		
+		OnMultiChoiceClickListener listener = new OnMultiChoiceClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+				tags.get( which ).setSelected( isChecked );
+				String text = "";
+				for ( Tag tag: tags ) {
+					if ( tag.isSelected() ) {
+						if ( !text.isEmpty() ) {
+							text += ",";
+						}
+						text += tag.getName();
+					}
+				}
+				tagsEditText.setText( text );
+				
+			}
+		};
+		
+		builder.setMultiChoiceItems(items, checked, listener);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+   			 
+	}	
 	
 	@Override
 	protected void onDestroy() {

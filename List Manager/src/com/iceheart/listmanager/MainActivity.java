@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.ActionBar;
-import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -32,10 +31,8 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.SpinnerAdapter;
 
 import com.google.gdata.data.DateTime;
 
@@ -177,7 +174,7 @@ public class MainActivity extends Activity  {
 	     ds.close();
 		
     	AlertDialog.Builder builder = new AlertDialog.Builder( this );
-    	builder.setMessage(taskInfo.get( "name" ));
+    	builder.setMessage( task.getNotes());
     	builder.setNeutralButton(R.string.dlgTask_markComplete, 
     			new DialogInterface.OnClickListener() {
             		@Override
@@ -217,7 +214,7 @@ public class MainActivity extends Activity  {
     		}
 		}
     	); 
-    	builder.setTitle(R.string.dlgTask_title);
+    	builder.setTitle(task.getName());
     	builder.setCancelable(true);
     	AlertDialog dialog = builder.create();
     	dialog.show();
