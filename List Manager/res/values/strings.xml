@@ -25,14 +25,18 @@
     <string name="password">Password</string>
     <string name="synchronize">Synchronize</string>
     <string name="syncOnStartup">Sync on Startup</string>
-    
+
     <string-array name="action_list">
         <item>Mercury</item>
         <item>Venus</item>
         <item>Earth</item>
     </string-array>
-        <string name="Notes">Notes</string>
-        <string name="tags">Tags</string>
-        <string name="date">Date</string>
+
+    <string name="Notes">Notes</string>
+    <string name="tags">Tags</string>
+    <string name="date">Date</string>
+    <string name="title_activity_tag">Tags</string>
+    <string name="title_master_list">Details</string>
+    <string name="title_master_detail">Master Detail</string>
 
 </resources>

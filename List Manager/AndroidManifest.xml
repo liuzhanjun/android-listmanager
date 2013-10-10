@@ -28,13 +28,29 @@
         </activity>
         <activity
             android:name="com.iceheart.listmanager.AddTaskActivity"
-            android:parentActivityName="com.iceheart.listmanager.MainActivity"
-            android:label="@string/title_activity_add_task" >
+            android:label="@string/title_activity_add_task"
+            android:parentActivityName="com.iceheart.listmanager.MainActivity" >
         </activity>
         <activity
             android:name="com.iceheart.listmanager.SettingsActivity"
-            android:parentActivityName="com.iceheart.listmanager.MainActivity"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="com.iceheart.listmanager.MainActivity" >
+        </activity>
+        <activity
+            android:name="com.iceheart.listmanager.TagActivity"
+            android:label="@string/title_activity_tag" >
+        </activity>
+        <activity
+            android:name="com.iceheart.listmanager.MasterListActivity"
+            android:label="@string/title_master_list" >
+        </activity>
+        <activity
+            android:name="com.iceheart.listmanager.MasterDetailActivity"
+            android:label="@string/title_master_detail"
+            android:parentActivityName=".MasterListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MasterListActivity" />
         </activity>
     </application>
 

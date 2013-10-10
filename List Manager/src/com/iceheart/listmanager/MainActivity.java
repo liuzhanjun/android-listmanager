@@ -5,13 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,7 @@ import android.widget.SimpleAdapter;
 public class MainActivity extends Activity  {
 	
 	private List<Task> tasks;
+	private List<Tag> tags;
 	private static boolean firstLoad = true;
 	private ListView listView;
 
@@ -33,11 +35,6 @@ public class MainActivity extends Activity  {
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.taskList);
         
-        TagListSpinnerAdaptor spinner = new TagListSpinnerAdaptor( this );
-       	getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-       	getActionBar().setListNavigationCallbacks(spinner, spinner);
-       	getActionBar().setDisplayShowTitleEnabled( false );
-        
         SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
 		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
 		if ( googleAccount.isEmpty() ) {
@@ -45,6 +42,7 @@ public class MainActivity extends Activity  {
 			return;
 		}
 
+		refreshTagList();
         refreshList();
         
         /*
@@ -58,6 +56,8 @@ public class MainActivity extends Activity  {
             firstLoad = false;
         }
         
+        
+
         listView.setOnItemClickListener(new OnItemClickListener() {
         	
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
@@ -106,6 +106,39 @@ public class MainActivity extends Activity  {
         listView.setAdapter(new SimpleAdapter(this, mylist, R.layout.row,
                 new String[] {"name", "price", "dueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}));
 	}
+	
+	public void refreshTagList() {
+		
+        final DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        // set a custom shadow that overlays the main content when the drawer opens
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		
+		TagDatasource ds = new TagDatasource( this );
+        ds.open();
+        tags = ds.getTags();
+        ds.close();
+        
+        List<Map<String, String>> mylist = new ArrayList<Map<String, String>>();
+        for ( Tag tag: tags ) {
+            mylist.add(tag.toMap());
+        }
+        
+        final ListView tagListView = (ListView) findViewById(R.id.tagsList);
+        tagListView.setAdapter(new SimpleAdapter(this, mylist, R.layout.tag_row,
+                new String[] {"name" }, new int[] {R.id.rowTagName}));
+        
+        tagListView.setOnItemClickListener(new OnItemClickListener() {
+        	
+            public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
+              @SuppressWarnings("unchecked")
+              Map<String,String> selectedTag = (Map<String,String>) (tagListView.getItemAtPosition(myItemInt));
+              refreshList( selectedTag.get( "name" ) );
+              mDrawerLayout.closeDrawers();
+            }
+        });        
+
+	}	
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

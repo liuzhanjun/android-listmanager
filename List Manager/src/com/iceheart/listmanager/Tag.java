@@ -1,6 +1,8 @@
 package com.iceheart.listmanager;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Tag {
 	
@@ -52,6 +54,12 @@ public class Tag {
 		Tag tag = (Tag) o;
 		return tag.getName().equals( this.getName() );
 		
+	}
+
+	public Map<String, String> toMap() {
+		Map<String,String> map = new HashMap<String,String>();
+		map.put( "name", name);
+		return map;
 	}
 	
 

@@ -62,6 +62,13 @@ public class TagDatasource {
       tags.add(tag);
       cursor.moveToNext();
     }
+    
+    // TODO: Remove
+    tags.add( new Tag( "TODO" ) );
+    tags.add( new Tag( "Maison" ) );
+    tags.add( new Tag( "Job" ) );
+    tags.add( new Tag( "List Manager" ) );
+    
     // Make sure to close the cursor
     cursor.close();
     return tags;
