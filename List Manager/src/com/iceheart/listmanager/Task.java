@@ -17,6 +17,8 @@ public class Task implements Serializable {
 	public static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat( "yyyy/MM/dd hh:mm:ss", Locale.CANADA_FRENCH );
 	public static final SimpleDateFormat FUNCTIONALID_FORMAT = new SimpleDateFormat( "yyyyMMddhhmmss", Locale.CANADA_FRENCH );
 	
+	private static final long ONE_DAY_MS = 24 * 60 * 60 * 1000;
+	
 	private static final long serialVersionUID = 1L;
 	
 	private Long id;
@@ -85,13 +87,41 @@ public class Task implements Serializable {
 		Map<String,String> map = new HashMap<String,String>();
 		map.put( "id", id.toString());
 		map.put( "name", name);
-		// TODO: Format price with 2 decimal ?
 		map.put( "price", estimatedPrice == null ? "": estimatedPrice.toString() +" $" );
-		map.put( "dueDate", dueDate == null ? "": DATE_FORMAT.format(dueDate) );
+		map.put( "dueDate", getFormattedDueDate() );
 		return map;
 	}
 	
 	
+	private String getFormattedDueDate() {
+		if ( dueDate == null ) {
+			return "";
+		}
+
+		long today = System.currentTimeMillis();
+		long dueDateTime = dueDate.getTime();
+		long diff = dueDateTime - today;
+		
+		if ( diff < 0 && diff > -(ONE_DAY_MS) ) {
+			// TODO: String resource
+			return "Today";
+		}
+		
+		if ( diff < 0 && diff > -(ONE_DAY_MS*2) ) {
+			// TODO: String resource
+			return "Yesterday";
+		}
+
+		if ( diff > 0 && diff < (ONE_DAY_MS) ) {
+			// TODO: String resource
+			return "Tomorrow";
+		}
+		
+		return DATE_FORMAT.format(dueDate);
+		
+		 
+	}
+
 	public String getTagsAsString() {
 		StringBuilder builder = new StringBuilder();
 		if ( getTags() != null ) {
