@@ -29,17 +29,18 @@
 	        android:dividerHeight="@dimen/row_divider_height"/>
         
       </RelativeLayout>
-    
-    
+      
     <!-- The navigation drawer -->
     <ListView android:id="@+id/tagsList"
-        android:layout_width="240dp"
+      android:layout_gravity="start" 
+      android:layout_width="250dp" 
         android:layout_height="match_parent"
-        android:layout_gravity="start"
         android:choiceMode="singleChoice"
         android:dividerHeight="1dp"
         android:divider="#AAA"
         android:background="#111"/>
+    
+    
     
     
 </android.support.v4.widget.DrawerLayout>

@@ -11,13 +11,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -28,6 +33,7 @@ public class MainActivity extends Activity  {
 	private static boolean firstLoad = true;
 	private static String selectedTag;
 	private ListView listView;
+	private ActionBarDrawerToggle toggle;
 
 
     @Override
@@ -35,6 +41,17 @@ public class MainActivity extends Activity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.taskList);
+        
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle( this,  drawerLayout, R.drawable.ic_drawer,  0,0 ) {};
+
+        // Set the drawer toggle as the DrawerListener
+        drawerLayout.setDrawerListener(toggle);
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);  
+        
+        toggle.syncState();
         
         SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
 		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
@@ -70,6 +87,19 @@ public class MainActivity extends Activity  {
         });
         
     }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (toggle.onOptionsItemSelected(item)) {
+          return true;
+        }
+        
+        // Handle your other action bar items...
+        return super.onOptionsItemSelected(item);
+    }
+    
     
     /**
      * Synchronize The Task list with the google account.
@@ -125,10 +155,48 @@ public class MainActivity extends Activity  {
         for ( Tag tag: tags ) {
             mylist.add(tag.toMap());
         }
+        mylist.add( new Tag( "New Tag" ).toMap() );        
         
         final ListView tagListView = (ListView) findViewById(R.id.tagsList);
         tagListView.setAdapter(new SimpleAdapter(this, mylist, R.layout.tag_row,
                 new String[] {"name" }, new int[] {R.id.rowTagName}));
+        
+        
+        tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, final int itemPos, long lng) {
+
+				 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+           	  	 builder.setTitle(R.string.delete_tag);
+           	  	 builder.setMessage( R.string.delete_tag_confirmation );
+           	  	 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() { 
+           	      
+           	  		 @Override
+           	  		 public void onClick(DialogInterface dialog, int which) {
+           	  			 TagDatasource ds = new TagDatasource( MainActivity.this );
+           	  			 ds.open();
+           	  			 Map<String,String> selectedTag = (Map<String,String>)tagListView.getItemAtPosition( itemPos );
+           	  			 ds.delete( new Tag( selectedTag.get( "name" ) ) );
+           	  			 ds.close();
+           	  			 refreshTagList();
+           	  		 }
+           	  	 });
+           	  	 
+	           	 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	           	      @Override
+	           	      public void onClick(DialogInterface dialog, int which) {
+	           	          dialog.cancel();
+	           	      }
+	           	  });
+
+	           	  builder.show();
+	           	  
+	           	  return true;
+			}
+			
+        });
+        
         
         tagListView.setOnItemClickListener(new OnItemClickListener() {
         	
@@ -136,11 +204,47 @@ public class MainActivity extends Activity  {
               @SuppressWarnings("unchecked")
               Map<String,String> selectedTagObj = (Map<String,String>) (tagListView.getItemAtPosition(myItemInt));
               selectedTag = selectedTagObj.get( "name" );
-              if ( selectedTag.equalsIgnoreCase( "ALL" ) ) {
-            	  selectedTag = null;
+              
+              
+              if ( selectedTag.equalsIgnoreCase( "New Tag" ) ) {
+            	  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            	  builder.setTitle(R.string.add_Tag);
+
+            	  // Set up the input
+            	  final EditText input = new EditText(MainActivity.this);
+            	  input.setInputType(InputType.TYPE_CLASS_TEXT);
+            	  builder.setView(input);
+
+            	  // Set up the buttons
+            	  builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
+            	      @Override
+            	      public void onClick(DialogInterface dialog, int which) {
+            	  		TagDatasource ds = new TagDatasource( MainActivity.this );
+            	        ds.open();
+            	        Tag tag = new Tag( input.getText().toString() );
+            	        ds.save( tag );
+            	        ds.close();
+            	        refreshTagList();
+            	      }
+            	  });
+            	  builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            	      @Override
+            	      public void onClick(DialogInterface dialog, int which) {
+            	          dialog.cancel();
+            	      }
+            	  });
+
+            	  builder.show();
+              } else {
+                  if ( selectedTag.equalsIgnoreCase( "ALL" ) ) {
+                	  selectedTag = null;
+                  }
+                  
+                  
+                  refreshList();
+                  mDrawerLayout.closeDrawers();
               }
-              refreshList();
-              mDrawerLayout.closeDrawers();
+              
             }
         });        
 

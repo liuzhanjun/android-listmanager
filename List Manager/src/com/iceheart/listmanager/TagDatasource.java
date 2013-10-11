@@ -48,7 +48,7 @@ public class TagDatasource {
   }
 
   public void delete(Tag tag) {
-	    database.delete( TaskSQLHelper.TABLE_TAG,  "name = " + tag.getName(), null );
+	    database.delete( TaskSQLHelper.TABLE_TAG,  "name = '" + tag.getName() + "'", null );
   }
 
   public List<Tag> getTags() {
@@ -62,12 +62,6 @@ public class TagDatasource {
       tags.add(tag);
       cursor.moveToNext();
     }
-    
-    // TODO: Remove
-    tags.add( new Tag( "TODO" ) );
-    tags.add( new Tag( "Maison" ) );
-    tags.add( new Tag( "Job" ) );
-    tags.add( new Tag( "List Manager" ) );
     
     // Make sure to close the cursor
     cursor.close();
@@ -88,7 +82,7 @@ public class TagDatasource {
 
 
 	public Tag getTagByName(String name ) {
-	    Cursor cursor = database.rawQuery( "select * from tag where name = " + name, null);
+	    Cursor cursor = database.rawQuery( "select * from tag where name = '" + name + "'", null);
 	    
 	    Tag tag = null;
 	    if ( cursor.getCount() > 0 ) {
