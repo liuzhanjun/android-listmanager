@@ -9,14 +9,6 @@
     android:background="@drawable/app_background"
     tools:context=".MainActivity" >
 
-
-<!-- 	<tablelayout android:id="@+id/TableLayout01" android:layout_width="fill_parent" android:layout_height="fill_parent"> -->
-<!-- 		<tablerow> -->
-<!-- 			<listview android:id="@android:id/list" android:layout_width="wrap_content" android:layout_height="wrap_content"> -->
-<!-- 			</listview> -->
-<!--         </tablerow> -->
-<!-- 	</tablelayout> -->
-
     <ListView
         android:id="@+id/taskList"
         android:layout_width="match_parent"
@@ -26,7 +18,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:divider="@android:color/transparent"
-        android:dividerHeight="5dp">
+        android:dividerHeight="@dimen/row_divider_height">
 
     </ListView>
    
