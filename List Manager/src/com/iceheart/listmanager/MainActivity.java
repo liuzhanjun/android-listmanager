@@ -1,6 +1,5 @@
 package com.iceheart.listmanager;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,25 +10,16 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
-import com.google.gdata.data.DateTime;
 
 public class MainActivity extends Activity  {
 	
@@ -114,30 +104,7 @@ public class MainActivity extends Activity  {
         }
 
         SimpleAdapter adapter = new SimpleAdapter(this, mylist, R.layout.row,
-                new String[] {"name", "price", "dueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
-
-            private ArrayList<ItemDrawable> itemBackgroundDrawables = new ArrayList<ItemDrawable>();
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-
-                while ( position >= itemBackgroundDrawables.size() ) {
-                    itemBackgroundDrawables.add( null );
-                }
-
-                convertView = super.getView(position, convertView, parent);
-
-                ItemDrawable itemBackgroundDrawable = itemBackgroundDrawables.get(position);
-                if ( itemBackgroundDrawable == null ) {
-                    itemBackgroundDrawable = new ItemDrawable((Map<String, String>) this.getItem( position ));
-                    itemBackgroundDrawables.set( position, itemBackgroundDrawable );
-                }
-
-                convertView.setBackground( itemBackgroundDrawable );
-
-                return convertView;
-            }
-        };
+                new String[] {"name", "price", "dueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate});
 
         listView.setAdapter( adapter );
 	}
@@ -253,67 +220,4 @@ public class MainActivity extends Activity  {
 		startActivity( intent );
 	}
 
-    public class ItemDrawable extends ShapeDrawable {
-        private ItemShape itemShape;
-
-        public ItemDrawable( Map<String,String> item ) {
-            super();
-
-            this.itemShape = new ItemShape( item );
-            setShape(this.itemShape);
-        }
-
-        @Override
-        public Shape getShape() {
-            return itemShape;
-        }
-    }
-
-    public class ItemShape extends Shape {
-        private Map<String, String> item;
-
-        public ItemShape( Map<String, String> item ) {
-            super();
-            this.item = item;
-        }
-
-        @Override
-        public void draw(Canvas canvas, Paint paint) {
-            Paint strokePaint = new Paint();
-
-            Log.v(this.getClass().getSimpleName(), "draw.item=" +  item );
-            Log.v(this.getClass().getSimpleName(), "draw.item=" + item.get("dueDate"));
-
-            boolean passed = false;
-            try {
-                SimpleDateFormat format =
-                        new SimpleDateFormat("yyyy/MM/dd");
-                Date date = format.parse( item.get("dueDate") );
-
-                if ( DateTime.now().compareTo( date ) > 0 ) {
-                    passed = true;
-                }
-            } catch (Exception ex) {
-                Log.v(this.getClass().getSimpleName(), "Exception:" + ex );
-            }
-//            if ( position % 3 == 0 ) {
-//                strokePaint.setARGB( 255, 255, 255, 0);
-//            } else if ( position %3 == 1 ) {
-//                strokePaint.setARGB( 255, 0, 255, 255);
-//            } else {
-//                // Do nothing
-//            }
-
-            if ( passed ) {
-                strokePaint.setARGB( 255, 255, 0, 0);
-                strokePaint.setStyle(Paint.Style.FILL_AND_STROKE);
-                strokePaint.setStrokeWidth(1);
-
-                Rect rect = new Rect( 0, 0, 4, canvas.getHeight() );
-
-                canvas.drawRect( rect, strokePaint);
-            }
-        }
-
-    }
 }

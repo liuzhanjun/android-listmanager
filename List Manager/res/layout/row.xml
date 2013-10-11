@@ -3,37 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusable="false"
-    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:height="@dimen/row_height"
     android:paddingLeft="10dp"
-    android:background="@drawable/border">
-    <!--android:paddingLeft="0dp"-->
-    <!--
-    <shape android:shape="rectangle">
-        <solid android:color="#00000000" />
-        <stroke  android:width="1dp"
-            android:color="#0000ff" />
-    </shape>
--->
-    <TextView
-        android:id="@+id/rowItemName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:focusable="false"
-        android:layout_gravity="left"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="90dp" />
-
+    android:padding="5dp"
+    android:background="@drawable/border"
+    >
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="75dp"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:focusable="false"
-        android:layout_gravity="right"
-        android:showDividers="middle"
-        android:layout_alignParentRight="true"
+        android:layout_gravity="left"
+        android:layout_width="wrap_content"
+        android:layout_marginRight="60dp"
+        android:layout_alignParentRight="false"
         android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/rowItemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:layout_gravity="left"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:textAppearance="@style/titleText"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
 
         <TextView
             android:id="@+id/rowItemDate"
@@ -41,21 +38,25 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:focusable="false"
+            android:textAppearance="@style/dateText"
             
             android:singleLine="true"
             android:layout_gravity="fill|top"
             android:numeric="decimal" />
-
-        <TextView
-            android:id="@+id/rowItemPrice"
-            android:layout_width="wrap_content"
-            android:focusable="false"
-            android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:singleLine="true"
-            android:layout_gravity="fill|bottom"
-            android:textAlignment="textEnd"
-            android:autoText="true" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/rowItemPrice"
+        android:layout_width="50dp"
+        android:focusable="false"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:layout_gravity="fill|bottom"
+        android:textAlignment="textEnd"
+        android:textAppearance="@style/amountText"
+        android:autoText="true"
+        android:layout_alignParentRight="true"
+        />
 
 </RelativeLayout>
