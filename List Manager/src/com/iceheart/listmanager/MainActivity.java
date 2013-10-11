@@ -92,7 +92,7 @@ public class MainActivity extends Activity  {
             tasks = ds.findActiveTasksByTag( selectedTag );
         }
         
-        setTitle( selectedTag == null ? "": selectedTag );
+        setTitle( selectedTag == null ? "ALL": selectedTag );
         ds.close();
         
         
@@ -120,6 +120,8 @@ public class MainActivity extends Activity  {
         ds.close();
         
         List<Map<String, String>> mylist = new ArrayList<Map<String, String>>();
+        
+        mylist.add( new Tag( "ALL" ).toMap() );
         for ( Tag tag: tags ) {
             mylist.add(tag.toMap());
         }
@@ -133,7 +135,10 @@ public class MainActivity extends Activity  {
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
               Map<String,String> selectedTagObj = (Map<String,String>) (tagListView.getItemAtPosition(myItemInt));
-              selectedTag = selectedTagObj.get( "name" ); 
+              selectedTag = selectedTagObj.get( "name" );
+              if ( selectedTag.equalsIgnoreCase( "ALL" ) ) {
+            	  selectedTag = null;
+              }
               refreshList();
               mDrawerLayout.closeDrawers();
             }
