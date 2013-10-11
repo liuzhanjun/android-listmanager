@@ -5,7 +5,7 @@
     android:focusable="false"
     android:height="@dimen/row_height"
     android:paddingLeft="10dp"
-    android:padding="5dp"
+    android:padding="8dp"
     android:background="@drawable/border"
     >
 
@@ -39,7 +39,6 @@
             android:ellipsize="marquee"
             android:focusable="false"
             android:textAppearance="@style/dateText"
-            
             android:singleLine="true"
             android:layout_gravity="fill|top"
             android:numeric="decimal" />
