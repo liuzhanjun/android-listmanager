@@ -6,8 +6,9 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingLeft="10dp"
     android:padding="5dp"
+    android:background="@drawable/border"
     >
-    <!--android:background="@drawable/border"-->
+
     <!--android:paddingLeft="0dp"-->
     <TextView
         android:id="@+id/rowItemName"
