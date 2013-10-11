@@ -15,13 +15,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.graphics.drawable.shapes.Shape;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -252,8 +255,6 @@ public class MainActivity extends Activity  {
 
         @Override
         public void draw(Canvas canvas, Paint paint) {
-            Paint strokePaint = new Paint();
-
             Log.v(this.getClass().getSimpleName(), "draw.item=" +  item );
             Log.v(this.getClass().getSimpleName(), "draw.item=" + item.get("dueDate"));
 
@@ -277,14 +278,33 @@ public class MainActivity extends Activity  {
 //                // Do nothing
 //            }
 
-            if ( passed ) {
-                strokePaint.setARGB( 255, 255, 0, 0);
-                strokePaint.setStyle(Paint.Style.FILL_AND_STROKE);
-                strokePaint.setStrokeWidth(1);
+            // Draw default background
+            //white background
+//            canvas.drawRGB(255, 255, 255);
+            // Box's properties
+            Rect rect = new Rect( 0, 0, canvas.getWidth(), canvas.getHeight());
+            RectF rectF = new RectF(rect);
 
-                Rect rect = new Rect( 0, 0, 4, canvas.getHeight() );
+            // Draw white background
+            paint.setARGB(0xFF,0xff, 0xff, 0xff);
+            paint.setStyle(Paint.Style.FILL);
+            canvas.drawRoundRect(rectF, 10.0f, 10.0f, paint);
 
-                canvas.drawRect( rect, strokePaint);
+            // Draw rounded border
+            paint.setARGB(0xFF,0x00, 0, 0);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(1);
+            canvas.drawRoundRect(rectF, 10.0f, 10.0f, paint);
+
+            // draw the flag
+            if ( passed && false) {
+                paint.setARGB( 255, 255, 0, 0);
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setStrokeWidth(1);
+
+                Rect rectFlag = new Rect( 0, 0, 4, canvas.getHeight() );
+
+                canvas.drawRect( rectFlag, paint);
             }
         }
 
