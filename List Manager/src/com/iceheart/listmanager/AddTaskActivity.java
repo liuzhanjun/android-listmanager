@@ -59,12 +59,6 @@ public class AddTaskActivity extends Activity {
 	     tags = ds.getTags();
 	     ds.close();
 		
-		// TODO: Call the dao.
-		tags.add( new Tag( "Maison"));
-		tags.add( new Tag( "TODO"));
-		tags.add( new Tag( "Job"));
-		tags.add( new Tag( "List Manager"));
-		
 		for ( Tag tag: tags ) {
 			if ( task.getTags().contains( tag.getName() ) ) {
 				tag.setSelected( true );

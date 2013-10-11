@@ -26,6 +26,7 @@ public class MainActivity extends Activity  {
 	private List<Task> tasks;
 	private List<Tag> tags;
 	private static boolean firstLoad = true;
+	private static String selectedTag;
 	private ListView listView;
 
 
@@ -82,19 +83,16 @@ public class MainActivity extends Activity  {
     }
     
 	public void refreshList() {
-		refreshList( null );
-	}
-    
-
-	public void refreshList( String tagName ) {
 		TaskDatasource ds = new TaskDatasource( this);
         ds.open();
         
-        if ( tagName == null ) {
+        if ( selectedTag == null ) {
             tasks = ds.getAllActiveTasks();
         } else {
-            tasks = ds.findActiveTasksByTag( tagName );
+            tasks = ds.findActiveTasksByTag( selectedTag );
         }
+        
+        setTitle( selectedTag == null ? "": selectedTag );
         ds.close();
         
         
@@ -134,8 +132,9 @@ public class MainActivity extends Activity  {
         	
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
-              Map<String,String> selectedTag = (Map<String,String>) (tagListView.getItemAtPosition(myItemInt));
-              refreshList( selectedTag.get( "name" ) );
+              Map<String,String> selectedTagObj = (Map<String,String>) (tagListView.getItemAtPosition(myItemInt));
+              selectedTag = selectedTagObj.get( "name" ); 
+              refreshList();
               mDrawerLayout.closeDrawers();
             }
         });        
