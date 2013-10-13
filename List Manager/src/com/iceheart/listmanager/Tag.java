@@ -15,6 +15,11 @@ public class Tag {
 	 */
 	private boolean selected = false;
 	
+	/**
+	 * Tansient field to store the number of task for this tag.
+	 */
+	private int taskCount = 0;
+	
 	public Tag( String name ) {
 		this.name = name;
 	}
@@ -46,6 +51,14 @@ public class Tag {
 		this.lastSynchroDate = lastSynchroDate;
 	}
 	
+	public int getTaskCount() {
+		return taskCount;
+	}
+
+	public void setTaskCount(int taskCount) {
+		this.taskCount = taskCount;
+	}	
+	
 	@Override
 	public boolean equals(Object o) {
 		if ( !( o instanceof Tag )  ) {
@@ -59,8 +72,13 @@ public class Tag {
 	public Map<String, String> toMap() {
 		Map<String,String> map = new HashMap<String,String>();
 		map.put( "name", name);
+		if ( getTaskCount() > 0 ) {
+			map.put( "taskCount", String.valueOf( getTaskCount() ));
+		}
 		return map;
 	}
+
+	
 	
 
 }

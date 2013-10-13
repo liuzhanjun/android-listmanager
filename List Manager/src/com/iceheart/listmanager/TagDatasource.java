@@ -93,4 +93,12 @@ public class TagDatasource {
 	    cursor.close();
 	    return tag;
 	}
+
+	public int findTaskCount(String name) {
+	    Cursor cursor = database.rawQuery( "select count(*) from task where tags like '%" + name + "%'", null);
+	    cursor.moveToFirst();
+	    int result = cursor.getInt( 0 );
+	    cursor.close();
+	    return result;
+	}
 } 

@@ -147,7 +147,18 @@ public class MainActivity extends Activity  {
 		TagDatasource ds = new TagDatasource( this );
         ds.open();
         tags = ds.getTags();
+        
+        /*
+         * For each tag, get the number of task
+         * TODO: optimize this: Cache this info, or one request for all
+         */
+        for ( Tag tag: tags ) {
+        	int taskCount = ds.findTaskCount( tag.getName() );
+        	tag.setTaskCount( taskCount );
+        }       
         ds.close();
+        
+        
         
         List<Map<String, String>> mylist = new ArrayList<Map<String, String>>();
         
@@ -159,7 +170,7 @@ public class MainActivity extends Activity  {
         
         final ListView tagListView = (ListView) findViewById(R.id.tagsList);
         tagListView.setAdapter(new SimpleAdapter(this, mylist, R.layout.tag_row,
-                new String[] {"name" }, new int[] {R.id.rowTagName}));
+                new String[] {"name", "taskCount" }, new int[] {R.id.rowTagName, R.id.rowTagTaskCount}));
         
         
         tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {
