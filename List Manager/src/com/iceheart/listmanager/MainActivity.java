@@ -383,7 +383,7 @@ public class MainActivity extends Activity  {
 		StringBuffer buffer = new StringBuffer();
 		
 		if ( selectedTag != null ) {
-			buffer.append( selectedTag );
+			buffer.append( selectedTag.getName() + " (" + selectedTag.getTaskCount() + " items)" );
 		} else {
 			buffer.append( "All Tasks" );
 		}
