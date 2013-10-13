@@ -11,7 +11,7 @@
     <string name="refresh">Refresh</string>
     <string name="manage_lists">Manage Lists</string>
     <string name="google_account">Google Account</string>
-    <string name="email_list">Email List</string>
+    <string name="share">Share</string>
     <string name="title_activity_add_task">AddTask</string>
     <string name="item_name">Item Name</string>
     <string name="save">Save</string>

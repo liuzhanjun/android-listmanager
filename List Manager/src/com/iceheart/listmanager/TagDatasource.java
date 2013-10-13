@@ -94,11 +94,16 @@ public class TagDatasource {
 	    return tag;
 	}
 
-	public int findTaskCount(String name) {
-	    Cursor cursor = database.rawQuery( "select count(*) from task where tags like '%" + name + "%'", null);
+	public void calculateActiveTaskCount(Tag tag) {
+	    Cursor cursor = database.rawQuery( 
+	    		"select count(*) " +
+	    		"from task " +
+	    		"where tags like '%" + tag.getName() + "%' " +
+	    		"and completed_date is null " +
+	    		"and status != '"  + TaskStatus.DELETED + "'", null);
 	    cursor.moveToFirst();
-	    int result = cursor.getInt( 0 );
+	    int taskCount = cursor.getInt( 0 );
+	    tag.setTaskCount( taskCount );
 	    cursor.close();
-	    return result;
 	}
 } 

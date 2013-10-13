@@ -1,5 +1,6 @@
 package com.iceheart.listmanager;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,12 +19,12 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
 
 public class MainActivity extends Activity  {
@@ -31,9 +32,10 @@ public class MainActivity extends Activity  {
 	private List<Task> tasks;
 	private List<Tag> tags;
 	private static boolean firstLoad = true;
-	private static String selectedTag;
+	private static Tag selectedTag;
 	private ListView listView;
 	private ActionBarDrawerToggle toggle;
+	private ShareActionProvider mShareActionProvider;
 
 
     @Override
@@ -51,7 +53,6 @@ public class MainActivity extends Activity  {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);  
         
-        toggle.syncState();
         
         SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
 		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
@@ -60,8 +61,8 @@ public class MainActivity extends Activity  {
 			return;
 		}
 
-		refreshTagList();
         refreshList();
+		refreshTagList();
         
         /*
          * Google Synchronization on startup (If settings says so)
@@ -72,6 +73,7 @@ public class MainActivity extends Activity  {
             	synchronizer.execute( this );
         	}
             firstLoad = false;
+            toggle.syncState();
         }
         
         
@@ -119,12 +121,30 @@ public class MainActivity extends Activity  {
         if ( selectedTag == null ) {
             tasks = ds.getAllActiveTasks();
         } else {
-            tasks = ds.findActiveTasksByTag( selectedTag );
+            tasks = ds.findActiveTasksByTag( selectedTag.getName() );
         }
-        
-        setTitle( selectedTag == null ? "ALL": selectedTag );
         ds.close();
+
         
+        String title = selectedTag == null ? "ALL": selectedTag.getName();
+        if ( tasks.size() > 0 ) {
+        	
+            title += " (" + tasks.size();
+            title += tasks.size() > 1? " items": " item";
+            BigDecimal totalPrice = new BigDecimal( 0 );
+            for ( Task task: tasks ) {
+            	if ( task.getEstimatedPrice() != null ) {
+            		totalPrice = totalPrice.add( task.getEstimatedPrice() );
+            	}
+            }
+            
+            if ( totalPrice.compareTo( BigDecimal.ZERO ) > 0 ) {
+            	title += " , " + totalPrice + "$";
+            }
+            title += ")";
+        }
+        setTitle( title );
+        setShareContent( tasks );
         
         List<Map<String, String>> mylist = new ArrayList<Map<String, String>>();
         for ( Task task: tasks ) {
@@ -150,17 +170,13 @@ public class MainActivity extends Activity  {
         
         /*
          * For each tag, get the number of task
-         * TODO: optimize this: Cache this info, or one request for all
          */
         for ( Tag tag: tags ) {
-        	int taskCount = ds.findTaskCount( tag.getName() );
-        	tag.setTaskCount( taskCount );
+        	ds.calculateActiveTaskCount( tag );
         }       
         ds.close();
         
-        
-        
-        List<Map<String, String>> mylist = new ArrayList<Map<String, String>>();
+        List<Map<String, Object>> mylist = new ArrayList<Map<String, Object>>();
         
         mylist.add( new Tag( "ALL" ).toMap() );
         for ( Tag tag: tags ) {
@@ -213,11 +229,12 @@ public class MainActivity extends Activity  {
         	
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
-              Map<String,String> selectedTagObj = (Map<String,String>) (tagListView.getItemAtPosition(myItemInt));
-              selectedTag = selectedTagObj.get( "name" );
+              Map<String,Object> selectedTagObj = (Map<String,Object>) (tagListView.getItemAtPosition(myItemInt));
+              String selectedTagName = (String)selectedTagObj.get( "name" ); 
+              selectedTag = (Tag) selectedTagObj.get( "tag");
               
               
-              if ( selectedTag.equalsIgnoreCase( "New Tag" ) ) {
+              if ( selectedTagName.equalsIgnoreCase( "New Tag" ) ) {
             	  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             	  builder.setTitle(R.string.add_Tag);
 
@@ -247,7 +264,7 @@ public class MainActivity extends Activity  {
 
             	  builder.show();
               } else {
-                  if ( selectedTag.equalsIgnoreCase( "ALL" ) ) {
+                  if ( selectedTagName.equalsIgnoreCase( "ALL" ) ) {
                 	  selectedTag = null;
                   }
                   
@@ -265,6 +282,15 @@ public class MainActivity extends Activity  {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        
+        MenuItem item = menu.findItem(R.id.share);
+        mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent() );
+        shareIntent.setType("text/plain");
+        mShareActionProvider.setShareIntent(shareIntent);
+        
         return true;
     }
     
@@ -338,5 +364,41 @@ public class MainActivity extends Activity  {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity( intent );
 	}
+	
+	public void setShareContent( List<Task> tasks) {
+		
+		if ( mShareActionProvider == null ) {
+			return;
+		}
+		
+		Intent sendIntent = new Intent();
+		sendIntent.setAction(Intent.ACTION_SEND);
+		sendIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent() );
+		sendIntent.setType("text/plain");
+		mShareActionProvider.setShareIntent( sendIntent );
+	}
+	
+	private String getShareListContent() {
+		
+		StringBuffer buffer = new StringBuffer();
+		
+		if ( selectedTag != null ) {
+			buffer.append( selectedTag );
+		} else {
+			buffer.append( "All Tasks" );
+		}
+		buffer.append( "\n\n" );
+		
+		for ( Task task: tasks ) {
+			if ( buffer.length() > 0 ) {
+				buffer.append( "\n" );
+			}
+			buffer.append( "- ");
+			buffer.append( task.getName() );
+		}
+		return buffer.toString();
+		
+	}
+	
 
 }

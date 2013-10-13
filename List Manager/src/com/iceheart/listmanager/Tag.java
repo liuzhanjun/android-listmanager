@@ -1,5 +1,6 @@
 package com.iceheart.listmanager;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,12 +70,14 @@ public class Tag {
 		
 	}
 
-	public Map<String, String> toMap() {
-		Map<String,String> map = new HashMap<String,String>();
+	public Map<String, Object> toMap() {
+		Map<String,Object> map = new HashMap<String,Object>();
 		map.put( "name", name);
 		if ( getTaskCount() > 0 ) {
 			map.put( "taskCount", String.valueOf( getTaskCount() ));
 		}
+		
+		map.put( "tag", this );
 		return map;
 	}
 
