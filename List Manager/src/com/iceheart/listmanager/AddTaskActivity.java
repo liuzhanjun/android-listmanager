@@ -34,6 +34,13 @@ public class AddTaskActivity extends Activity {
 			this.task = (Task) getIntent().getExtras().get( "task");
 		} else {
 			task = new Task();
+			
+			/*
+			 * If the task list was displaying a specific tag. Default this with this tag.
+			 */
+			if ( MainActivity.selectedTag != null ) {
+				task.setTags( MainActivity.selectedTag.getName() );
+			}
 		}
 		
 		EditText editName = (EditText) findViewById(R.id.editItemName);

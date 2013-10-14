@@ -32,7 +32,7 @@ public class MainActivity extends Activity  {
 	private List<Task> tasks;
 	private List<Tag> tags;
 	private static boolean firstLoad = true;
-	private static Tag selectedTag;
+	public static Tag selectedTag;
 	private ListView listView;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
