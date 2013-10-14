@@ -112,7 +112,7 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( 
 	    		"select * from task " +
 	    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
-	    		"order by due_date, creation_date", null);
+	    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
@@ -188,7 +188,7 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( "select * from task " +
 	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
 	    								   "and tags like '%"+tagName+"%' " +
-	    								   "order by due_date, creation_date", null);
+	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
