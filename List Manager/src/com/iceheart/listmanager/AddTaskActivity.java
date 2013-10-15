@@ -34,6 +34,13 @@ public class AddTaskActivity extends Activity {
 			this.task = (Task) getIntent().getExtras().get( "task");
 		} else {
 			task = new Task();
+			
+			/*
+			 * If the task list was displaying a specific tag. Default this with this tag.
+			 */
+			if ( MainActivity.selectedTag != null ) {
+				task.setTags( MainActivity.selectedTag.getName() );
+			}
 		}
 		
 		EditText editName = (EditText) findViewById(R.id.editItemName);
@@ -163,6 +170,7 @@ public class AddTaskActivity extends Activity {
 				cal.set( year, monthOfYear, dayOfMonth);
 				dueDate.setText( Task.DATE_FORMAT.format( cal.getTime() ) );
 			}
+			
 		};
 		Date oldDueDate = task.getDueDate() == null ? new Date(): task.getDueDate();
 		Calendar cal = Calendar.getInstance();
@@ -171,6 +179,11 @@ public class AddTaskActivity extends Activity {
 		DatePickerDialog dateDialog = new DatePickerDialog(this, listener, cal.get(Calendar.YEAR), cal.get( Calendar.MONTH), cal.get( Calendar.DAY_OF_MONTH) );
 		dateDialog.show();
 		
+	}
+	
+	public void deleteDueDate( View view ) {
+		EditText dueDate = (EditText) findViewById(R.id.editDueDate);
+		dueDate.setText( "" );
 	}
 	
 	

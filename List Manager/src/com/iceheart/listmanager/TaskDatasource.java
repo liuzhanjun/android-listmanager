@@ -112,7 +112,7 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( 
 	    		"select * from task " +
 	    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
-	    		"order by due_date, creation_date", null);
+	    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
@@ -188,7 +188,7 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( "select * from task " +
 	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
 	    								   "and tags like '%"+tagName+"%' " +
-	    								   "order by due_date, creation_date", null);
+	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
@@ -200,4 +200,24 @@ public class TaskDatasource {
 	    cursor.close();
 	    return tasks;
 	}
+
+	public List<Task> findIncomingTask() {
+		 List<Task> tasks = new ArrayList<Task>();
+		 
+		    Cursor cursor = database.rawQuery( 
+		    		"select * from task " +
+		    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
+		    		"and due_date <= " + (System.currentTimeMillis() + (7 * 24*60*60*1000 )) + " " +
+		    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
+
+		    cursor.moveToFirst();
+		    while (!cursor.isAfterLast()) {
+		      Task task = cursorToTask(cursor);
+		      tasks.add(task);
+		      cursor.moveToNext();
+		    }
+		    // Make sure to close the cursor
+		    cursor.close();
+		    return tasks; 
+		}
 } 
