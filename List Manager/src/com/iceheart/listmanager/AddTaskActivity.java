@@ -127,6 +127,12 @@ public class AddTaskActivity extends Activity {
 	}
 	
 	public void save(View view ) {
+		
+		
+		if ( !validate() ) {
+			return;
+		} 
+		
 		EditText itemNameText = (EditText) findViewById(R.id.editItemName);
 		task.setName( itemNameText.getText().toString() );
 			
@@ -155,6 +161,39 @@ public class AddTaskActivity extends Activity {
 		startActivity(intent );
 	}
 	
+	private boolean validate() {
+		
+		/*
+		 * Make sure the user have entered a task name
+		 */
+		EditText itemNameText = (EditText) findViewById(R.id.editItemName);
+		String itemName = itemNameText.getText().toString();
+		if ( itemName == null || itemName.isEmpty() ) {
+			 AlertDialog.Builder builder = new AlertDialog.Builder(this);
+       	  	 builder.setTitle(R.string.validation_failed);
+       	  	 builder.setMessage( R.string.task_name_mandatory );
+       	  	 builder.setCancelable(true);
+       	  	 builder.show();
+			return false;
+		}
+		
+		
+		/*
+		 * Make sure the user have entered a tag.
+		 */
+		EditText tags = (EditText) findViewById(R.id.editTags);
+		String tagList = tags.getText().toString();
+		if ( tagList == null || tagList.isEmpty() ) {
+			 AlertDialog.Builder builder = new AlertDialog.Builder(this);
+       	  	 builder.setTitle(R.string.validation_failed);
+       	  	 builder.setMessage( R.string.tags_must_be_specified );
+       	  	 builder.setCancelable(true);
+       	  	 builder.show();
+			return false;
+		}
+		return true;
+	}
+
 	public void cancel(View view ) {
 		this.task = null;
 		Intent intent = new Intent(this, MainActivity.class);
