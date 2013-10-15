@@ -170,6 +170,7 @@ public class AddTaskActivity extends Activity {
 				cal.set( year, monthOfYear, dayOfMonth);
 				dueDate.setText( Task.DATE_FORMAT.format( cal.getTime() ) );
 			}
+			
 		};
 		Date oldDueDate = task.getDueDate() == null ? new Date(): task.getDueDate();
 		Calendar cal = Calendar.getInstance();
@@ -178,6 +179,11 @@ public class AddTaskActivity extends Activity {
 		DatePickerDialog dateDialog = new DatePickerDialog(this, listener, cal.get(Calendar.YEAR), cal.get( Calendar.MONTH), cal.get( Calendar.DAY_OF_MONTH) );
 		dateDialog.show();
 		
+	}
+	
+	public void deleteDueDate( View view ) {
+		EditText dueDate = (EditText) findViewById(R.id.editDueDate);
+		dueDate.setText( "" );
 	}
 	
 	
