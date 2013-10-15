@@ -62,7 +62,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		long lastSynchronisation = sharedPreferences.getLong( ApplicationSettings.LAST_SYNCHRONIZATION, -1 );
 		
 		
-//		synchronizeTaskList(context, lastSynchronisation);
+		synchronizeTaskList(context, lastSynchronisation);
 		synchronizeTags( context, lastSynchronisation );
 
 		
