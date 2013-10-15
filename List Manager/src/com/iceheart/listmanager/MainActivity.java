@@ -397,13 +397,17 @@ public class MainActivity extends Activity  {
 		}
 		buffer.append( "\n\n" );
 		
-		for ( Task task: tasks ) {
-			if ( buffer.length() > 0 ) {
-				buffer.append( "\n" );
+		if ( tasks != null ) {
+			for ( Task task: tasks ) {
+				if ( buffer.length() > 0 ) {
+					buffer.append( "\n" );
+				}
+				buffer.append( "- ");
+				buffer.append( task.getName() );
 			}
-			buffer.append( "- ");
-			buffer.append( task.getName() );
+			
 		}
+		
 		return buffer.toString();
 		
 	}
