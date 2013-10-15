@@ -19,7 +19,7 @@ public class TaskSQLHelper extends SQLiteOpenHelper {
 	
 
 	private static final String DATABASE_NAME = "listmanagement.db";
-	private static final int DATABASE_VERSION = 5;
+	private static final int DATABASE_VERSION = 6;
 
 	private static final String CREATE_TASK = 
 			"create table task ( " +
@@ -39,7 +39,8 @@ public class TaskSQLHelper extends SQLiteOpenHelper {
 	private static final String CREATE_TAG = 
 			"create table tag ( " +
 			" name text, " +
-			" last_synchro_date numeric " +			
+			" last_synchro_date numeric, " +
+			" status text " + 
 			");";
 	
 

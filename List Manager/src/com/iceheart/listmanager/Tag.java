@@ -1,6 +1,5 @@
 package com.iceheart.listmanager;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +9,8 @@ public class Tag {
 	private String name;
 	
 	private Date lastSynchroDate;	
+	
+	private TagStatus status = TagStatus.ACTIVE;
 	
 	/**
 	 * Transient field for the AddTask screen.
@@ -79,6 +80,14 @@ public class Tag {
 		
 		map.put( "tag", this );
 		return map;
+	}
+
+	public TagStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TagStatus status) {
+		this.status = status;
 	}
 
 	

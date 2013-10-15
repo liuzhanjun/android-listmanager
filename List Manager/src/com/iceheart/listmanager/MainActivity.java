@@ -27,6 +27,8 @@ import android.widget.ListView;
 import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
 
+import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
+
 public class MainActivity extends Activity  {
 	
 	private List<Task> tasks;
@@ -168,7 +170,7 @@ public class MainActivity extends Activity  {
 		
 		TagDatasource ds = new TagDatasource( this );
         ds.open();
-        tags = ds.getTags();
+        tags = ds.getAllActiveTags();
         
         /*
          * For each tag, get the number of task
@@ -208,7 +210,9 @@ public class MainActivity extends Activity  {
            	  			 TagDatasource ds = new TagDatasource( MainActivity.this );
            	  			 ds.open();
            	  			 Map<String,String> selectedTag = (Map<String,String>)tagListView.getItemAtPosition( itemPos );
-           	  			 ds.delete( new Tag( selectedTag.get( "name" ) ) );
+           	  			 Tag tagToDelete = ds.getTagByName( selectedTag.get("name") );
+           	  			 tagToDelete.setStatus( TagStatus.DELETED );
+           	  			 ds.save( tagToDelete );
            	  			 ds.close();
            	  			 refreshTagList();
            	  		 }

@@ -30,7 +30,7 @@ public class TagDatasource {
   public Tag save( Tag tag ) {
     ContentValues values = new ContentValues();
     values.put(  "name", tag.getName() );
-    
+    values.put(  "status", tag.getStatus().name() );
     
     if ( tag.getLastSynchroDate() == null ) {
     	tag.setLastSynchroDate(new Date());
@@ -41,7 +41,7 @@ public class TagDatasource {
     if ( persistedTag == null ) {
         database.insert(TaskSQLHelper.TABLE_TAG, null, values );
     } else {
-    	database.update( "tag", values, "name = " + tag.getName(), null );
+    	database.update( "tag", values, "name = '" + tag.getName() + "'", null );
     }
     return tag;
     
@@ -51,7 +51,7 @@ public class TagDatasource {
 	    database.delete( TaskSQLHelper.TABLE_TAG,  "name = '" + tag.getName() + "'", null );
   }
 
-  public List<Tag> getTags() {
+  public List<Tag> getAllTags() {
     List<Tag> tags = new ArrayList<Tag>();
 
     Cursor cursor = database.rawQuery( "select * from tag", null);
@@ -68,6 +68,24 @@ public class TagDatasource {
     return tags;
   }
   
+  public List<Tag> getAllActiveTags() {
+	    List<Tag> tags = new ArrayList<Tag>();
+
+	    Cursor cursor = database.rawQuery( "select * from tag where status = '"+ TagStatus.ACTIVE+"'", null);
+
+	    cursor.moveToFirst();
+	    while (!cursor.isAfterLast()) {
+	      Tag tag = cursorToTag(cursor);
+	      tags.add(tag);
+	      cursor.moveToNext();
+	    }
+	    
+	    // Make sure to close the cursor
+	    cursor.close();
+	    return tags;
+	  }
+  
+  
   private Tag cursorToTag(Cursor cursor) {
     Tag tag = new Tag();
     tag.setName(cursor.getString(0));
@@ -76,6 +94,9 @@ public class TagDatasource {
     if ( lastSynchroDate != null && lastSynchroDate != 0 ) {
         tag.setLastSynchroDate( new Date( lastSynchroDate));
     }
+    
+    tag.setStatus(TagStatus.valueOf(cursor.getString(2) ));
+    
     
     return tag;
   }

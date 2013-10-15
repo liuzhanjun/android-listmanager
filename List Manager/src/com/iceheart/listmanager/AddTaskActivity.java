@@ -63,7 +63,7 @@ public class AddTaskActivity extends Activity {
 		
 		 TagDatasource ds = new TagDatasource( this );
 	     ds.open();
-	     tags = ds.getTags();
+	     tags = ds.getAllActiveTags();
 	     ds.close();
 		
 		for ( Tag tag: tags ) {
