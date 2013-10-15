@@ -24,8 +24,9 @@
     </style>
 
     <style name="amountText">
-        <item name="android:textColor">#ff0000</item>
+        <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="dateText">

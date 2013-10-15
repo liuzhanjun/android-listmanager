@@ -69,7 +69,11 @@ public class Task implements Serializable {
 		return estimatedPrice;
 	}
 	public void setEstimatedPrice(BigDecimal estimatedPrice) {
-		this.estimatedPrice = estimatedPrice;
+        if ( estimatedPrice != null ) {
+            this.estimatedPrice = estimatedPrice.setScale(2);
+        } else {
+		    this.estimatedPrice = null;
+        }
 	}
 	public BigDecimal getRealPrice() {
 		return realPrice;
