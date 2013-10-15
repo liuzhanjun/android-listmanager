@@ -26,6 +26,7 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -212,7 +213,7 @@ public class MainActivity extends Activity  {
          * For each tag, get the number of task
          */
         for ( Tag tag: tags ) {
-        	ds.calculateActiveTaskCount( tag );
+        	ds.calculateActiveTaskCount(tag);
         }       
         ds.close();
         
@@ -339,7 +340,7 @@ public class MainActivity extends Activity  {
 
 	public void openAddTask( View view ) {
 		Intent intent = new Intent(this, AddTaskActivity.class);
-		startActivity( intent );
+		startActivity(intent);
 	}
 	
 	public void openAddTask( MenuItem item ) {
