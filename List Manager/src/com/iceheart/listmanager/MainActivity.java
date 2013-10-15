@@ -32,7 +32,7 @@ public class MainActivity extends Activity  {
 	private List<Task> tasks;
 	private List<Tag> tags;
 	private static boolean firstLoad = true;
-	public static Tag selectedTag;
+	public static Tag selectedTag = new Tag( "Coming Soon");
 	private ListView listView;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
@@ -120,6 +120,8 @@ public class MainActivity extends Activity  {
         
         if ( selectedTag == null ) {
             tasks = ds.getAllActiveTasks();
+        } else if ( selectedTag.getName().equalsIgnoreCase( "Coming Soon")) {
+            tasks = ds.findIncomingTask();
         } else {
             tasks = ds.findActiveTasksByTag( selectedTag.getName() );
         }
@@ -178,7 +180,9 @@ public class MainActivity extends Activity  {
         
         List<Map<String, Object>> mylist = new ArrayList<Map<String, Object>>();
         
+        // TODO: resource label
         mylist.add( new Tag( "ALL" ).toMap() );
+        mylist.add( new Tag( "Coming Soon" ).toMap() );
         for ( Tag tag: tags ) {
             mylist.add(tag.toMap());
         }
