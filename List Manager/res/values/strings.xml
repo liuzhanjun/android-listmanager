@@ -30,6 +30,10 @@
     <string name="synchronize">Synchronize</string>
     <string name="syncOnStartup">Sync on Startup</string>
     <string name="yes">Yes</string>
+    <string name="tags_must_be_specified">You must choose at least one tag.</string>
+    <string name="task_name_mandatory">You must specify a task name</string>
+    
+    <string name="validation_failed">Validation Failed</string>
     
 
     <string-array name="action_list">

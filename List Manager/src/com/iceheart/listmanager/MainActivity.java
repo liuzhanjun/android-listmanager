@@ -1,23 +1,18 @@
 package com.iceheart.listmanager;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -36,6 +31,8 @@ import android.widget.ListView;
 import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
 
 public class MainActivity extends Activity  {
 	
@@ -164,7 +161,7 @@ public class MainActivity extends Activity  {
         }
 
         SimpleAdapter adapter = new SimpleAdapter(this, mylist, R.layout.row,
-                new String[] {"name", "price", "dueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
+                new String[] {"name", "price", "formattedDueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -179,7 +176,7 @@ public class MainActivity extends Activity  {
 
                         if ( date.before( new Date()) ) {
                             ImageView itemImageView = (ImageView) view.findViewById(R.id.rowFlag);
-                            itemImageView.setImageResource(R.drawable.calendar);
+                            itemImageView.setImageResource(R.drawable.ic_overdue);
                         }
                     } catch (ParseException e) {
                     }
@@ -207,7 +204,7 @@ public class MainActivity extends Activity  {
 		
 		TagDatasource ds = new TagDatasource( this );
         ds.open();
-        tags = ds.getTags();
+        tags = ds.getAllActiveTags();
         
         /*
          * For each tag, get the number of task
@@ -266,7 +263,9 @@ public class MainActivity extends Activity  {
            	  			 TagDatasource ds = new TagDatasource( MainActivity.this );
            	  			 ds.open();
            	  			 Map<String,String> selectedTag = (Map<String,String>)tagListView.getItemAtPosition( itemPos );
-           	  			 ds.delete( new Tag( selectedTag.get( "name" ) ) );
+           	  			 Tag tagToDelete = ds.getTagByName( selectedTag.get("name") );
+           	  			 tagToDelete.setStatus( TagStatus.DELETED );
+           	  			 ds.save( tagToDelete );
            	  			 ds.close();
            	  			 refreshTagList();
            	  		 }
@@ -450,15 +449,17 @@ public class MainActivity extends Activity  {
 			buffer.append( "All Tasks" );
 		}
 		buffer.append( "\n\n" );
+		
 		if ( tasks != null ) {
-            for ( Task task: tasks ) {
-                if ( buffer.length() > 0 ) {
-                    buffer.append( "\n" );
-                }
-                buffer.append( "- ");
-                buffer.append( task.getName() );
-            }
-        }
+			for ( Task task: tasks ) {
+				if ( buffer.length() > 0 ) {
+					buffer.append( "\n" );
+				}
+				buffer.append( "- ");
+				buffer.append( task.getName() );
+			}
+			
+		}
 		return buffer.toString();
 		
 	}

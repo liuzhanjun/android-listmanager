@@ -11,6 +11,8 @@ public class Tag {
 	
 	private Date lastSynchroDate;	
 	
+	private TagStatus status = TagStatus.ACTIVE;
+	
 	/**
 	 * Transient field for the AddTask screen.
 	 */
@@ -34,13 +36,8 @@ public class Tag {
             resourceId = R.drawable.ic_tag_add;
         }
 	}
-
-    public Tag( String name, int iconResourceId ) {
-        this.name = name;
-        this.resourceId = iconResourceId;
-    }
-
-    public Tag() {
+	
+	public Tag() {
 	}
 
 	public String getName() {
@@ -100,6 +97,13 @@ public class Tag {
 		return map;
 	}
 
+	public TagStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(TagStatus status) {
+		this.status = status;
+	}
 
     public int getIconId() {
         return resourceId;
