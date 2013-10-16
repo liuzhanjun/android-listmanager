@@ -92,7 +92,7 @@ public class Task implements Serializable {
 		map.put( "id", id.toString());
 		map.put( "name", name);
 		map.put( "price", estimatedPrice == null ? "": estimatedPrice.toString() +" $" );
-		map.put( "dueDate", DATE_FORMAT.format( getDueDate() ) );
+		map.put( "dueDate", getDueDate() == null ? "": DATE_FORMAT.format( getDueDate() ) );
 		map.put( "formattedDueDate", getFormattedDueDate() );
 				
 		return map;
