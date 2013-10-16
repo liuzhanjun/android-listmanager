@@ -21,7 +21,7 @@ public class GoogleAccountInfo {
 		username = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
 		password = sharedPreferences.getString( ApplicationSettings.GOOGLE_PASSWORD, "" );
 		taskListFeed = sharedPreferences.getString( ApplicationSettings.GOOGLE_LIST_FEED, "" );
-		taskListFeed = sharedPreferences.getString( ApplicationSettings.GOOGLE_TAGS_FEED, "" );		
+		tagsFeed = sharedPreferences.getString( ApplicationSettings.GOOGLE_TAGS_FEED, "" );		
 	}
 	
 	public String getUsername() {
