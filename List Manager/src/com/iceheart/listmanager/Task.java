@@ -92,7 +92,9 @@ public class Task implements Serializable {
 		map.put( "id", id.toString());
 		map.put( "name", name);
 		map.put( "price", estimatedPrice == null ? "": estimatedPrice.toString() +" $" );
-		map.put( "dueDate", getFormattedDueDate() );
+		map.put( "dueDate", DATE_FORMAT.format( getDueDate() ) );
+		map.put( "formattedDueDate", getFormattedDueDate() );
+				
 		return map;
 	}
 	
@@ -101,6 +103,8 @@ public class Task implements Serializable {
 		if ( dueDate == null ) {
 			return "";
 		}
+		
+		 String formattedDate = DATE_FORMAT.format(dueDate);	
 
 		long today = System.currentTimeMillis();
 		long dueDateTime = dueDate.getTime();
@@ -108,20 +112,21 @@ public class Task implements Serializable {
 		
 		if ( diff < 0 && diff > -(ONE_DAY_MS) ) {
 			// TODO: String resource
-			return "Today";
+			return formattedDate + " (Today)";
 		}
 		
 		if ( diff < 0 && diff > -(ONE_DAY_MS*2) ) {
 			// TODO: String resource
-			return "Yesterday";
+			return formattedDate + " (Yesterday)";
 		}
 
 		if ( diff > 0 && diff < (ONE_DAY_MS) ) {
 			// TODO: String resource
-			return "Tomorrow";
+			return formattedDate + " (Tomorrow)";
+
 		}
 		
-		return DATE_FORMAT.format(dueDate);
+		return formattedDate;
 		
 		 
 	}

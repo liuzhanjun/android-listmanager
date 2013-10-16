@@ -161,7 +161,7 @@ public class MainActivity extends Activity  {
         }
 
         SimpleAdapter adapter = new SimpleAdapter(this, mylist, R.layout.row,
-                new String[] {"name", "price", "dueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
+                new String[] {"name", "price", "formattedDueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
@@ -176,7 +176,7 @@ public class MainActivity extends Activity  {
 
                         if ( date.before( new Date()) ) {
                             ImageView itemImageView = (ImageView) view.findViewById(R.id.rowFlag);
-                            itemImageView.setImageResource(R.drawable.calendar);
+                            itemImageView.setImageResource(R.drawable.ic_overdue);
                         }
                     } catch (ParseException e) {
                     }
