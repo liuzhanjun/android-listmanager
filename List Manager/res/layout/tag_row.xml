@@ -26,6 +26,7 @@
         android:layout_gravity="right"
         android:layout_marginRight="5dp"
         android:layout_marginLeft="25dp"
+        android:textAlignment="viewEnd"
         android:singleLine="true"
         android:focusable="false"
         android:textColor="#FFF"

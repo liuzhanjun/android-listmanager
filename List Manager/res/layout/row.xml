@@ -15,7 +15,7 @@
         android:focusable="false"
         android:layout_gravity="left"
         android:layout_width="wrap_content"
-        android:layout_marginRight="60dp"
+        android:layout_marginRight="120dp"
         android:layout_alignParentRight="false"
         android:layout_alignParentTop="true">
 
@@ -44,18 +44,35 @@
             android:numeric="decimal" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/rowItemPrice"
-        android:layout_width="50dp"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="match_parent"
         android:focusable="false"
-        android:layout_height="wrap_content"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:layout_gravity="fill|bottom"
-        android:textAlignment="textEnd"
-        android:textAppearance="@style/amountText"
-        android:autoText="true"
+        android:layout_gravity="right"
+        android:layout_width="110dp"
         android:layout_alignParentRight="true"
-        />
+        android:layout_alignParentTop="true"
+        android:dividerPadding="5dp"
+        >
+
+        <ImageView
+            android:id="@+id/rowFlag"
+            android:layout_width="30dp"
+            android:layout_height="24dp"
+            android:focusable="false"
+            android:layout_gravity="fill|top"
+            />
+
+        <TextView
+            android:id="@+id/rowItemPrice"
+            android:layout_width="70dp"
+            android:layout_height="24dp"
+            android:focusable="false"
+            android:singleLine="true"
+            android:layout_gravity="center_vertical|right"
+            android:textAlignment="viewEnd"
+            android:textAppearance="@style/amountText"
+            android:autoText="true"/>
+    </LinearLayout>
 
 </RelativeLayout>

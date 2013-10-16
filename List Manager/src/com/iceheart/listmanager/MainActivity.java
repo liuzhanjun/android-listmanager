@@ -1,6 +1,8 @@
 package com.iceheart.listmanager;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,13 +21,16 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
 
@@ -156,7 +161,36 @@ public class MainActivity extends Activity  {
         }
 
         SimpleAdapter adapter = new SimpleAdapter(this, mylist, R.layout.row,
-                new String[] {"name", "price", "dueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate});
+                new String[] {"name", "price", "dueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+
+                Map<String, String> entry = (Map<String, String>) this.getItem(position);
+                String itemDueDate = entry.get("dueDate");
+                if ( itemDueDate != null && itemDueDate.length() > 0 ) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy/MM/dd");
+
+                    try {
+                        Date date = simpleDateFormat.parse(itemDueDate);
+
+                        if ( date.before( new Date()) ) {
+                            ImageView itemImageView = (ImageView) view.findViewById(R.id.rowFlag);
+                            itemImageView.setImageResource(R.drawable.calendar);
+                        }
+                    } catch (ParseException e) {
+                    }
+                }
+
+                String itemPrice = entry.get("price");
+                if ( itemPrice != null && itemPrice.length() > 0 ) {
+                    TextView itemTextView = (TextView) view.findViewById(R.id.rowItemPrice);
+                    itemTextView.setBackgroundResource(R.drawable.row_price_background );
+                }
+
+                return view;
+            }
+        };
 
         listView.setAdapter( adapter );
 	}
@@ -176,7 +210,7 @@ public class MainActivity extends Activity  {
          * For each tag, get the number of task
          */
         for ( Tag tag: tags ) {
-        	ds.calculateActiveTaskCount( tag );
+        	ds.calculateActiveTaskCount(tag);
         }       
         ds.close();
         
@@ -305,7 +339,7 @@ public class MainActivity extends Activity  {
 
 	public void openAddTask( View view ) {
 		Intent intent = new Intent(this, AddTaskActivity.class);
-		startActivity( intent );
+		startActivity(intent);
 	}
 	
 	public void openAddTask( MenuItem item ) {
@@ -407,7 +441,6 @@ public class MainActivity extends Activity  {
 			}
 			
 		}
-		
 		return buffer.toString();
 		
 	}
