@@ -1,6 +1,5 @@
 package com.iceheart.listmanager;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,25 +21,31 @@ public class Tag {
 	 * Tansient field to store the number of task for this tag.
 	 */
 	private int taskCount = 0;
-    private int resourceId = -1;
+    private int iconId = -1;
 
     public Tag( String name ) {
 		this.name = name;
 
         // TODO: something better to associate resource icon to tag type
         if ( name.equalsIgnoreCase( "ALL" ) ) {
-            resourceId =  R.drawable.ic_tag_all;
+            iconId =  R.drawable.ic_tag_all;
         } else if ( name.equalsIgnoreCase( "Coming Soon" ) ) {
-            resourceId = R.drawable.ic_coming_soon;
+            iconId = R.drawable.ic_coming_soon;
         } else if ( name.equalsIgnoreCase( "New Tag") ) {
-            resourceId = R.drawable.ic_tag_add;
+            iconId = R.drawable.ic_tag_add;
         }
 	}
 	
 	public Tag() {
 	}
 
-	public String getName() {
+    public Tag(String name, int iconId ) {
+        this.name = name;
+        this.iconId = iconId;
+
+    }
+
+    public String getName() {
 		return name;
 	}
 
@@ -72,7 +77,7 @@ public class Tag {
 		this.taskCount = taskCount;
         // TODO: something better to associate resource icon to tag type
         if ( taskCount > 0 ) {
-            resourceId = R.drawable.ic_tag;
+            iconId = R.drawable.ic_tag;
         }
 	}	
 	
@@ -106,10 +111,10 @@ public class Tag {
 	}
 
     public int getIconId() {
-        return resourceId;
+        return iconId;
     }
 
     public void setIconId( int resourceId ) {
-        this.resourceId = resourceId;
+        this.iconId = resourceId;
     }
 }
