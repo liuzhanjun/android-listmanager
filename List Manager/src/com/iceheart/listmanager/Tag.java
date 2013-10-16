@@ -20,12 +20,27 @@ public class Tag {
 	 * Tansient field to store the number of task for this tag.
 	 */
 	private int taskCount = 0;
-	
-	public Tag( String name ) {
+    private int resourceId = -1;
+
+    public Tag( String name ) {
 		this.name = name;
+
+        // TODO: something better to associate resource icon to tag type
+        if ( name.equalsIgnoreCase( "ALL" ) ) {
+            resourceId =  R.drawable.ic_tag_all;
+        } else if ( name.equalsIgnoreCase( "Coming Soon" ) ) {
+            resourceId = R.drawable.ic_coming_soon;
+        } else if ( name.equalsIgnoreCase( "New Tag") ) {
+            resourceId = R.drawable.ic_tag_add;
+        }
 	}
-	
-	public Tag() {
+
+    public Tag( String name, int iconResourceId ) {
+        this.name = name;
+        this.resourceId = iconResourceId;
+    }
+
+    public Tag() {
 	}
 
 	public String getName() {
@@ -58,6 +73,10 @@ public class Tag {
 
 	public void setTaskCount(int taskCount) {
 		this.taskCount = taskCount;
+        // TODO: something better to associate resource icon to tag type
+        if ( taskCount > 0 ) {
+            resourceId = R.drawable.ic_tag;
+        }
 	}	
 	
 	@Override
@@ -81,7 +100,12 @@ public class Tag {
 		return map;
 	}
 
-	
-	
 
+    public int getIconId() {
+        return resourceId;
+    }
+
+    public void setIconId( int resourceId ) {
+        this.resourceId = resourceId;
+    }
 }

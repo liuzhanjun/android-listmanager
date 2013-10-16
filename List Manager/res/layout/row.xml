@@ -60,8 +60,7 @@
             android:layout_width="30dp"
             android:layout_height="24dp"
             android:focusable="false"
-            android:layout_gravity="fill|top"
-            />
+            android:layout_gravity="fill|top" />
 
         <TextView
             android:id="@+id/rowItemPrice"

@@ -42,7 +42,7 @@ public class MainActivity extends Activity  {
 	private List<Task> tasks;
 	private List<Tag> tags;
 	private static boolean firstLoad = true;
-	public static Tag selectedTag = new Tag( "Coming Soon");
+	public static Tag selectedTag = new Tag( "Coming Soon", R.drawable.ic_coming_soon);
 	private ListView listView;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
@@ -229,7 +229,26 @@ public class MainActivity extends Activity  {
         
         final ListView tagListView = (ListView) findViewById(R.id.tagsList);
         tagListView.setAdapter(new SimpleAdapter(this, mylist, R.layout.tag_row,
-                new String[] {"name", "taskCount" }, new int[] {R.id.rowTagName, R.id.rowTagTaskCount}));
+                new String[] {"name", "taskCount" }, new int[] {R.id.rowTagName, R.id.rowTagTaskCount}){
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+
+                ImageView iconView = (ImageView) view.findViewById(R.id.rowTagIcon);
+
+                Tag entry = (Tag) ((Map<String, Object>)this.getItem(position)).get("tag");
+
+                if ( entry != null ) {
+                    int resourceId = entry.getIconId();
+//                    if ( resourceId != -1)
+                    iconView.setImageResource(resourceId);
+                }
+
+                return view;
+            }
+
+        });
         
         
         tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {

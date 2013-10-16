@@ -3,12 +3,3 @@
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
     android:src="@drawable/rainy_days_water_droplets"
     android:tileMode="repeat" />
-
-<!--<shape xmlns:android="http://schemas.android.com/apk/res/android">-->
-    <!--<gradient-->
-        <!--android:angle="90"-->
-        <!--android:startColor="#FF0000FF"-->
-        <!--android:centerColor="#FF00FFFF"-->
-        <!--android:endColor="#FF0000FF"-->
-        <!--android:type="linear" />-->
-<!--</shape>-->
