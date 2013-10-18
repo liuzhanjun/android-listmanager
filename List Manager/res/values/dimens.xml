@@ -6,4 +6,11 @@
 
     <dimen name="row_divider_height">2dp</dimen>
     <dimen name="row_height">32dip</dimen>
+    <dimen name="row_img_width">32dp</dimen>
+    <dimen name="row_img_height">28dp</dimen>
+
+    <dimen name="drawer_width">250dp</dimen>
+    <dimen name="drawer_divider_height">1dp</dimen>
+    <dimen name="drawer_row_height">36dip</dimen>
+    <dimen name="drawer_row_img">24dp</dimen>
 </resources>

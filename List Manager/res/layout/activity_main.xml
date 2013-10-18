@@ -26,19 +26,19 @@
 	         android:layout_alignParentRight="true" 
 	         android:layout_alignParentTop="true"
 	         android:divider="@android:color/transparent"
-	        android:dividerHeight="@dimen/row_divider_height"/>
+	         android:dividerHeight="@dimen/drawer_divider_height"/>
         
       </RelativeLayout>
       
     <!-- The navigation drawer -->
     <ListView android:id="@+id/tagsList"
-      android:layout_gravity="start" 
-      android:layout_width="250dp" 
+        android:layout_gravity="start"
+        android:layout_width="@dimen/drawer_width"
         android:layout_height="match_parent"
         android:choiceMode="singleChoice"
-        android:dividerHeight="1dp"
-        android:divider="#aaa"
-        android:background="#fff"/>
+        android:dividerHeight="@dimen/drawer_divider_height"
+        android:divider="@color/drawerDivider"
+        android:background="@color/drawerBackground"/>
 
 </android.support.v4.widget.DrawerLayout>
    

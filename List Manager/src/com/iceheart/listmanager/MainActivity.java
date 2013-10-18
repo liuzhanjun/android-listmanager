@@ -4,9 +4,13 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -18,6 +22,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +37,7 @@ import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.google.gdata.data.DateTime;
 import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
 
 public class MainActivity extends Activity  {
@@ -162,30 +168,54 @@ public class MainActivity extends Activity  {
 
         SimpleAdapter adapter = new SimpleAdapter(this, mylist, R.layout.row,
                 new String[] {"name", "price", "formattedDueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
+
+            private Calendar today = Calendar.getInstance();
+
+            {
+                today.setTime(new Date() );
+                today.set( Calendar.HOUR_OF_DAY, 0 );
+                today.set( Calendar.MINUTE, 0 );
+                today.set( Calendar.SECOND, 0 );
+                today.set( Calendar.MILLISECOND, 0 );
+                today.set( Calendar.MILLISECOND, 0 );
+            }
+
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
 
-                Map<String, String> entry = (Map<String, String>) this.getItem(position);
-                String itemDueDate = entry.get("dueDate");
+                Map<String, Object> entry = (Map<String, Object>) this.getItem(position);
+                String itemDueDate = (String)entry.get("dueDate");
                 if ( itemDueDate != null && itemDueDate.length() > 0 ) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy/MM/dd");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
 
+                    ImageView itemImageView = (ImageView) view.findViewById(R.id.rowFlag);
                     try {
-                        Date date = simpleDateFormat.parse(itemDueDate);
+                        Calendar date = Calendar.getInstance();
+                        date.setTime( simpleDateFormat.parse(itemDueDate) );
+                        date.set( Calendar.HOUR_OF_DAY, 0 );
+                        date.set( Calendar.MINUTE, 0 );
+                        date.set( Calendar.SECOND, 0 );
+                        date.set( Calendar.MILLISECOND, 0 );
 
-                        if ( date.before( new Date()) ) {
-                            ImageView itemImageView = (ImageView) view.findViewById(R.id.rowFlag);
+                        if ( date.before(today) ) {
                             itemImageView.setImageResource(R.drawable.ic_overdue);
+                        } else if ( date.equals(today)) {
+                            itemImageView.setImageResource(R.drawable.ic_due_today);
+                        } else {
+                            itemImageView.setImageResource(0);
                         }
-                    } catch (ParseException e) {
+                    } catch (Exception e) {
+                        itemImageView.setImageResource(0);
                     }
                 }
 
-                String itemPrice = entry.get("price");
+                String itemPrice = (String)entry.get("price");
+                TextView itemTextView = (TextView) view.findViewById(R.id.rowItemPrice);
                 if ( itemPrice != null && itemPrice.length() > 0 ) {
-                    TextView itemTextView = (TextView) view.findViewById(R.id.rowItemPrice);
-                    itemTextView.setBackgroundResource(R.drawable.row_price_background );
+                    itemTextView.setBackgroundResource(R.drawable.row_price_background);
+                } else {
+                    itemTextView.setBackgroundResource(0);
                 }
 
                 return view;

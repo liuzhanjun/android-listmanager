@@ -51,27 +51,24 @@
         android:layout_gravity="right"
         android:layout_width="110dp"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:dividerPadding="5dp"
-        >
+        android:dividerPadding="5dp" >
 
         <ImageView
             android:id="@+id/rowFlag"
-            android:layout_width="32dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/row_img_width"
+            android:layout_height="@dimen/row_img_height"
             android:focusable="false"
             android:layout_gravity="fill|top" />
 
         <TextView
             android:id="@+id/rowItemPrice"
             android:layout_width="70dp"
-            android:layout_height="24dp"
+            android:layout_height="wrap_content"
             android:focusable="false"
             android:singleLine="true"
-            android:layout_gravity="center_vertical|right"
+            android:layout_gravity="right"
             android:textAlignment="viewEnd"
-            android:textAppearance="@style/amountText"
-            android:autoText="true"/>
+            android:textAppearance="@style/amountText" />
     </LinearLayout>
 
 </RelativeLayout>

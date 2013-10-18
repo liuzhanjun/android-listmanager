@@ -2,20 +2,20 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     	android:layout_width="match_parent"
-    	android:layout_height="match_parent" 
-    	android:orientation="horizontal"
-    	android:padding="4dp" 
+        android:layout_height="wrap_content"
+    	android:height="@dimen/drawer_row_height"
+    	android:padding="4dp"
     	android:focusable="false">
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/drawer_row_height"
         android:layout_alignParentLeft="true" >
 
         <ImageView
             android:id="@+id/rowTagIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/drawer_row_img"
+            android:layout_height="@dimen/drawer_row_img"
             android:background="@android:color/transparent"
             android:focusable="false" />
 

@@ -36,6 +36,9 @@
 
     <style name="menuText">
         <item name="android:textColor">#333</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
+
+    <color name="drawerDivider">#ccc</color>
+    <color name="drawerBackground">#dfdfdf</color>
 </resources>

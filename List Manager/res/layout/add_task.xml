@@ -10,14 +10,115 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".AddTaskActivity" >
 
-    <EditText
-        android:id="@+id/editItemName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="The task name"
-        android:inputType="text" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:divider="@android:color/transparent"
+        android:dividerPadding="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:dividerPadding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp" >
+            <ImageView android:src="@drawable/ic_view_title"
+                android:layout_width="24dp"
+                android:layout_height="24dp"/>
+
+            <EditText
+                android:id="@+id/editItemName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:hint="The task name"
+                android:inputType="text"
+                android:singleLine="true"/>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:dividerPadding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp" >
+            <ImageView android:src="@drawable/ic_view_price"
+                android:layout_width="24dp"
+                android:layout_height="24dp"/>
+            <EditText
+                android:id="@+id/editPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Estimated Price"
+                android:inputType="numberDecimal" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:dividerPadding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp" >
+            <ImageView android:src="@drawable/ic_view_calendar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"/>
+            <EditText
+                android:id="@+id/editDueDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:hint="@string/dueDate"
+                android:inputType="none"
+                android:onClick="changeDueDate" />
+            <ImageButton
+                android:id="@+id/btnDeleteDueDate"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="24dp"
+                android:layout_height="36dp"
+                android:layout_above="@+id/editTags"
+                android:layout_toRightOf="@+id/editDueDate"
+                android:src="@drawable/ic_delete"
+                android:hint="@string/delete"
+                android:onClick="deleteDueDate" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:dividerPadding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp" >
+            <ImageView android:src="@drawable/ic_view_tag"
+                android:layout_width="24dp"
+                android:layout_height="24dp"/>
+            <EditText
+                android:id="@+id/editTags"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:hint="@string/tags"
+                android:inputType="none"
+                android:onClick="chooseTags" />
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:dividerPadding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp" >
+            <ImageView android:src="@drawable/ic_view_note"
+                android:layout_width="24dp"
+                android:layout_height="24dp"/>
+            <EditText
+                android:id="@+id/editNotes"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:ems="10"
+                android:hint="@string/Notes"
+                android:inputType="textImeMultiLine" />
+        </LinearLayout>
+    </LinearLayout>
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
@@ -36,70 +137,5 @@
         android:layout_toRightOf="@+id/button1"
         android:onClick="cancel"
         android:text="@android:string/cancel" />
-
-    <EditText
-        android:id="@+id/editPrice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editItemName"
-        android:layout_below="@+id/editItemName"
-        android:layout_marginTop="14dp"
-        android:ems="10"
-        android:hint="Estimated Price"
-        android:inputType="numberDecimal"
-        android:textAlignment="textEnd" >
-
-        <requestFocus />
-    </EditText>
-
-    <EditText
-        android:id="@+id/editDueDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editPrice"
-        android:layout_below="@+id/editPrice"
-        android:layout_marginTop="21dp"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/dueDate"
-        android:inputType="none"
-        android:onClick="changeDueDate" />
-
-    <EditText
-        android:id="@+id/editNotes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button1"
-        android:layout_alignLeft="@+id/editDueDate"
-        android:layout_marginBottom="94dp"
-        android:ems="10"
-        android:hint="@string/Notes"
-        android:inputType="textMultiLine" />
-
-    <EditText
-        android:id="@+id/editTags"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editDueDate"
-        android:layout_below="@+id/editDueDate"
-        android:layout_marginTop="26dp"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/tags"
-        android:inputType="none"
-        android:onClick="chooseTags" />
-
-    <ImageButton
-        android:id="@+id/btnDeleteDueDate"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/editTags"
-        android:layout_toRightOf="@+id/editDueDate"
-        android:src="@drawable/ic_delete"
-        android:hint="@string/delete"
-        android:onClick="deleteDueDate" />
 
 </RelativeLayout>
