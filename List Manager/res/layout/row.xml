@@ -67,7 +67,6 @@
             android:focusable="false"
             android:singleLine="true"
             android:layout_gravity="right"
-            android:textAlignment="viewEnd"
             android:textAppearance="@style/amountText" />
     </LinearLayout>
 
