@@ -75,9 +75,6 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
         editor.commit();
 		
 		return Boolean.TRUE;
-		
-		
-		
 
 	}
 
@@ -155,9 +152,9 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		TaskDatasource ds = new TaskDatasource( context);
 		ds.open();
 		List<Task> localTasks = ds.getAllTasks();
-		Map<String, Task> taskMap = new HashMap<String,Task>();
+		Map<Long, Task> taskMap = new HashMap<Long,Task>();
 		for ( Task localTask: localTasks ) {
-			taskMap.put( localTask.getFunctionalId(), localTask );
+			taskMap.put( localTask.getId(), localTask );
 		}
 		
 		ListFeed tasksFromGoogle = readTasksGoogleSpreadsheet(context);
@@ -165,7 +162,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		for ( ListEntry taskEntry: tasksFromGoogle.getEntries() ) {
 			Task googleTask = listEntryToTask( taskEntry );
 			
-			Task localTask = taskMap.remove( googleTask.getFunctionalId()  );
+			Task localTask = taskMap.remove( googleTask.getId()  );
 			
 			if ( localTask == null ) {
 				googleTask = ds.save( googleTask );
@@ -225,6 +222,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		entry.getCustomElements().setValueLocal("notes", localTask.getNotes() == null ? "": localTask.getNotes() );
 		entry.getCustomElements().setValueLocal("reaprice", localTask.getRealPrice() == null ? "": localTask.getRealPrice().toPlainString() );
 		entry.getCustomElements().setValueLocal("tags", localTask.getTagsAsString() );
+		entry.getCustomElements().setValueLocal("id", String.valueOf( localTask.getId() ) );
 		try {
 			entry.update();
 		} catch (Exception e) {
@@ -251,6 +249,11 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		task.setNotes(entry.getCustomElements().getValue( "notes") );
 		task.setRealPrice( entry.getCustomElements().getValue( "realPrice")  );
     	task.setTags( entry.getCustomElements().getValue( "tags" ));
+    	String taskId = entry.getCustomElements().getValue( "id" );
+    	if ( taskId != null && !taskId.isEmpty() ) {
+        	task.setId( Long.parseLong( taskId ) );
+    		
+    	}
     	return task;
 		
 	}

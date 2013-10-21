@@ -33,14 +33,6 @@ public class Task implements Serializable {
 	private List<String> tags = new ArrayList<String>();
 	private TaskStatus status = TaskStatus.ACTIVE;
 	
-	public String getFunctionalId() {
-		String functionalId = name;
-		if ( getCreationDate() != null ) {
-			functionalId += "|" + FUNCTIONALID_FORMAT.format( getCreationDate() );
-		}
-		return functionalId;
-	} 
-	
 	public String getName() {
 		return name;
 	}
