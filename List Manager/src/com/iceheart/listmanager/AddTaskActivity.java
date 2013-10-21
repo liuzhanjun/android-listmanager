@@ -38,7 +38,7 @@ public class AddTaskActivity extends Activity {
 			/*
 			 * If the task list was displaying a specific tag. Default this with this tag.
 			 */
-			if ( MainActivity.selectedTag != null ) {
+			if ( MainActivity.selectedTag != null && MainActivity.selectedTag.getType() == TagType.USER_DEFINED ) {
 				task.setTags( MainActivity.selectedTag.getName() );
 			}
 		}

@@ -22,27 +22,56 @@ public class Tag {
 	 */
 	private int taskCount = 0;
     private int iconId = -1;
+    private TagType type = TagType.USER_DEFINED;
+    
+    /**
+     * Constructor to build a System predefined list.
+     */
+    public Tag( TagType type ) {
+    	this.type = type;
+    	
+    	switch ( type ) {
+    		case  SYSTEM_ALL:
+    			// TODO Resource label
+    			this.name = "ALL";
+    		    iconId =  R.drawable.ic_tag_all;
+    			break;
+    		case  SYSTEM_COMING_SOON:
+    			// TODO Resource label
+    			this.name = "Coming Soon";
+                iconId = R.drawable.ic_coming_soon;
+                break;
+    		case  SYSTEM_NEW_TAG:
+    			// TODO Resource label
+    			this.name = "New Tag";
+                iconId = R.drawable.ic_tag_add;
+                break;
+                
+            default:
+            	throw new IllegalStateException( "Please use the other constructor to build a user-defined list." );
 
+    			
+    	}
+    }
+
+    /**
+     * Constructor to build a user-defined list.
+     * @param name
+     */
     public Tag( String name ) {
 		this.name = name;
-
-        // TODO: something better to associate resource icon to tag type
-        if ( name.equalsIgnoreCase( "ALL" ) ) {
-            iconId =  R.drawable.ic_tag_all;
-        } else if ( name.equalsIgnoreCase( "Coming Soon" ) ) {
-            iconId = R.drawable.ic_coming_soon;
-        } else if ( name.equalsIgnoreCase( "New Tag") ) {
-            iconId = R.drawable.ic_tag_add;
-        }
+		this.type = TagType.USER_DEFINED;
+        iconId = R.drawable.ic_tag_add;
 	}
 	
 	public Tag() {
+        iconId = R.drawable.ic_tag;
+		this.type = TagType.USER_DEFINED;
 	}
 
     public Tag(String name, int iconId ) {
         this.name = name;
         this.iconId = iconId;
-
     }
 
     public String getName() {
@@ -75,10 +104,6 @@ public class Tag {
 
 	public void setTaskCount(int taskCount) {
 		this.taskCount = taskCount;
-        // TODO: something better to associate resource icon to tag type
-        if ( taskCount > 0 ) {
-            iconId = R.drawable.ic_tag;
-        }
 	}	
 	
 	@Override
@@ -117,4 +142,12 @@ public class Tag {
     public void setIconId( int resourceId ) {
         this.iconId = resourceId;
     }
+
+	public TagType getType() {
+		return type;
+	}
+
+	public void setType(TagType type) {
+		this.type = type;
+	}
 }

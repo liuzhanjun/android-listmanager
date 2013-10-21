@@ -1,16 +1,12 @@
 package com.iceheart.listmanager;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -22,7 +18,6 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,7 +32,6 @@ import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.google.gdata.data.DateTime;
 import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
 
 public class MainActivity extends Activity  {
@@ -45,7 +39,7 @@ public class MainActivity extends Activity  {
 	private List<Task> tasks;
 	private List<Tag> tags;
 	private static boolean firstLoad = true;
-	public static Tag selectedTag = new Tag( "Coming Soon", R.drawable.ic_coming_soon);
+	public static Tag selectedTag = new Tag(  TagType.SYSTEM_COMING_SOON );
 	private ListView listView;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
@@ -131,9 +125,9 @@ public class MainActivity extends Activity  {
 		TaskDatasource ds = new TaskDatasource( this);
         ds.open();
         
-        if ( selectedTag == null ) {
+        if ( selectedTag == null || selectedTag.getType() == TagType.SYSTEM_ALL ) {
             tasks = ds.getAllActiveTasks();
-        } else if ( selectedTag.getName().equalsIgnoreCase( "Coming Soon")) {
+        } else if ( selectedTag.getType() == TagType.SYSTEM_COMING_SOON) {
             tasks = ds.findIncomingTask();
         } else {
             tasks = ds.findActiveTasksByTag( selectedTag.getName() );
@@ -141,7 +135,7 @@ public class MainActivity extends Activity  {
         ds.close();
 
         
-        String title = selectedTag == null ? "ALL": selectedTag.getName();
+        String title = selectedTag.getName();
         if ( tasks.size() > 0 ) {
         	
             title += " (" + tasks.size();
@@ -246,13 +240,12 @@ public class MainActivity extends Activity  {
         
         List<Map<String, Object>> mylist = new ArrayList<Map<String, Object>>();
         
-        // TODO: resource label
-        mylist.add( new Tag( "ALL" ).toMap() );
-        mylist.add( new Tag( "Coming Soon" ).toMap() );
+        mylist.add( new Tag( TagType.SYSTEM_ALL ).toMap() );
+        mylist.add( new Tag( TagType.SYSTEM_COMING_SOON ).toMap() );
         for ( Tag tag: tags ) {
             mylist.add(tag.toMap());
         }
-        mylist.add( new Tag( "New Tag" ).toMap() );        
+        mylist.add( new Tag( TagType.SYSTEM_NEW_TAG ).toMap() );        
         
         final ListView tagListView = (ListView) findViewById(R.id.tagsList);
         tagListView.setAdapter(new SimpleAdapter(this, mylist, R.layout.tag_row,
@@ -282,6 +275,14 @@ public class MainActivity extends Activity  {
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, final int itemPos, long lng) {
+				
+  	  			 final Map<String,Object> selectedTag = (Map<String,Object>)tagListView.getItemAtPosition( itemPos );
+  	  			 
+  	  			 Tag tag = (Tag) selectedTag.get( "tag" );
+  	  			 if ( tag.getType() != TagType.USER_DEFINED ) {
+  	  				 return false;
+  	  			 }
+  	  			 
 
 				 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
            	  	 builder.setTitle(R.string.delete_tag);
@@ -292,8 +293,7 @@ public class MainActivity extends Activity  {
            	  		 public void onClick(DialogInterface dialog, int which) {
            	  			 TagDatasource ds = new TagDatasource( MainActivity.this );
            	  			 ds.open();
-           	  			 Map<String,String> selectedTag = (Map<String,String>)tagListView.getItemAtPosition( itemPos );
-           	  			 Tag tagToDelete = ds.getTagByName( selectedTag.get("name") );
+           	  			 Tag tagToDelete = ds.getTagByName( (String)selectedTag.get("name") );
            	  			 tagToDelete.setStatus( TagStatus.DELETED );
            	  			 ds.save( tagToDelete );
            	  			 ds.close();
@@ -321,11 +321,10 @@ public class MainActivity extends Activity  {
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
               Map<String,Object> selectedTagObj = (Map<String,Object>) (tagListView.getItemAtPosition(myItemInt));
-              String selectedTagName = (String)selectedTagObj.get( "name" ); 
               selectedTag = (Tag) selectedTagObj.get( "tag");
               
               
-              if ( selectedTagName.equalsIgnoreCase( "New Tag" ) ) {
+              if ( selectedTag.getType() == TagType.SYSTEM_NEW_TAG ) {
             	  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             	  builder.setTitle(R.string.add_Tag);
 
@@ -355,11 +354,6 @@ public class MainActivity extends Activity  {
 
             	  builder.show();
               } else {
-                  if ( selectedTagName.equalsIgnoreCase( "ALL" ) ) {
-                	  selectedTag = null;
-                  }
-                  
-                  
                   refreshList();
                   mDrawerLayout.closeDrawers();
               }
