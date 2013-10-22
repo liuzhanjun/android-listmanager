@@ -1,6 +1,8 @@
 package com.iceheart.listmanager.googlesync;
 
 import java.net.URL;
+import java.text.NumberFormat;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +36,17 @@ import com.iceheart.listmanager.TaskStatus;
  * @author Luc Martineau
  *
  */
-public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
+public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> {
 	
 	private ProgressDialog progressDialog;
 	private MainActivity taskListActivity;
-	
-	public GoogleTaskSynchronizer( MainActivity activity ) {
+
+    public GoogleTaskSynchronizer( MainActivity activity ) {
 		this.taskListActivity = activity;
-		progressDialog = new ProgressDialog( activity);
+		progressDialog = new ProgressDialog(activity);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setProgressNumberFormat(null);
 	}
 	
 	/**
@@ -79,6 +84,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 	}
 
 	private void synchronizeTags(Context context, long lastSynchronisation) {
+        publishProgress( "Synchronizing Tags List", null, -1 );
 
 		TagDatasource ds = new TagDatasource( context );
 		ds.open();
@@ -87,11 +93,20 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		for ( Tag localTag: localTags ) {
 			tagMap.put( localTag.getName(), localTag );
 		}
-		
+
+        publishProgress("Reading tags from Google Drive");
+
 		ListFeed tagsFromGoogle = readTagsGoogleSpreadsheet(context);
-		
-		
+        List<ListEntry> googleEntries = tagsFromGoogle.getEntries();
+        if ( googleEntries.size() > 0 ) {
+            publishProgress( "Processing Google Spreadsheet Tags", 0, googleEntries.size() );
+        }
+
+        int count = 0;
 		for ( ListEntry tagEntry: tagsFromGoogle.getEntries() ) {
+            count++;
+            publishProgress( null, count );
+
 			Tag googleTag = listEntryToTag( tagEntry );
 			
 			Tag localTag = tagMap.remove( googleTag.getName()  );
@@ -114,9 +129,17 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 				updateTagEntry(tagEntry, localTag);
 			}
 		}
-		
-		for ( Tag localTask: tagMap.values() ) {
-			
+
+        Collection<Tag> tagValues = tagMap.values();
+        if (tagValues.size() > 0 ) {
+            publishProgress( "Synchronizing Local Tag Changes", 0, tagValues.size() );
+        }
+
+        count = 0;
+		for ( Tag localTask: tagValues ) {
+            count++;
+            publishProgress( null, count );
+
 			/*
 			 * Determine if this task has been DELETED from the spreadsheet after the last synchronization
 			 * OR if it is a new task that has been added since the last synchronization.
@@ -136,9 +159,6 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 			}
 		}
 		ds.close();		
-		
-		
-		
 	}
 
 	/**
@@ -148,6 +168,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 	 * @param lastSynchronisation The last synchronization timestamp.
 	 */
 	private void synchronizeTaskList(Context context, long lastSynchronisation) {
+        publishProgress( "Synchronizing Task List", null, -1 );
 
 		TaskDatasource ds = new TaskDatasource( context);
 		ds.open();
@@ -156,10 +177,22 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		for ( Task localTask: localTasks ) {
 			taskMap.put( localTask.getId(), localTask );
 		}
-		
-		ListFeed tasksFromGoogle = readTasksGoogleSpreadsheet(context);
-		
-		for ( ListEntry taskEntry: tasksFromGoogle.getEntries() ) {
+
+        publishProgress("Reading tasks from Google Spreadsheet");
+
+        ListFeed tasksFromGoogle = readTasksGoogleSpreadsheet(context);
+
+        List<ListEntry> googleEntries = tasksFromGoogle.getEntries();
+        if ( googleEntries.size() > 0 ) {
+            publishProgress( "Processing Google Spreadsheet Tasks", 0, googleEntries.size() );
+        }
+
+        int count = 0;
+		for ( ListEntry taskEntry: googleEntries ) {
+
+            count++;
+            publishProgress( null, count );
+
 			Task googleTask = listEntryToTask( taskEntry );
 			
 			Task localTask = taskMap.remove( googleTask.getId()  );
@@ -182,10 +215,18 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 			} else {
 				updateTaskEntry(taskEntry, localTask);
 			}
+
 		}
-		
-		for ( Task localTask: taskMap.values() ) {
-			
+
+        Collection<Task> taskValues = taskMap.values();
+        if (taskValues.size() > 0 ) {
+            publishProgress( "Synchronizing Local Task Changes", 0, taskValues.size() );
+        }
+
+        count = 0;
+		for ( Task localTask: taskValues ) {
+			count++;
+            publishProgress( null, count );
 			/*
 			 * Determine if this task has been DELETED from the spreadsheet after the last synchronization
 			 * OR if it is a new task that has been added since the last synchronization.
@@ -207,8 +248,8 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		ds.close();
 
 	}
-	
-	/**
+
+    /**
 	 * Update the spreadsheet entry with the task information.
 	 * @param entry The Spreadsheet entry to update.
 	 * @param localTask The task information 
@@ -386,6 +427,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		progressDialog.setTitle( "Synchronization");
 		progressDialog.setMessage( "Synchronizing with google drive...");
 		progressDialog.show();
+
 	}
 	
 	@Override
@@ -394,4 +436,27 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Void, Boolean> {
 		taskListActivity.refreshList();
 	}
 
+    @Override
+    protected void onProgressUpdate(Object... values) {
+
+        if ( values.length > 0 && values[0] != null ) {
+            progressDialog.setMessage( (String)values[0] );
+        }
+        if ( values.length > 1 && values[1] != null ) {
+            progressDialog.setProgress( (Integer)values[1]);
+        }
+        if ( values.length > 2 && values[2] != null ) {
+            int max = (Integer)values[2];
+
+            if ( max == -1 ) {
+                progressDialog.setIndeterminate(true);
+                progressDialog.setProgressNumberFormat(null);
+            } else {
+                progressDialog.setIndeterminate(false);
+                progressDialog.setMax( max );
+                progressDialog.setProgressNumberFormat("%1d/%2d");
+            }
+        }
+
+    }
 }
