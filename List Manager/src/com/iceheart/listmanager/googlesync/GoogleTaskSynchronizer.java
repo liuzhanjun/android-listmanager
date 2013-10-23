@@ -1,7 +1,6 @@
 package com.iceheart.listmanager.googlesync;
 
 import java.net.URL;
-import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +9,8 @@ import java.util.Map;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
@@ -57,9 +58,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		
 		Context context = params[0];
 		
-		// TODO: Check if there is an Internet connection available or not.
-		boolean internetConnectionAvailable = true;
-		if ( !internetConnectionAvailable ) {
+		if ( !haveNetworkConnection() ) {
 			return Boolean.FALSE;
 		}
 		
@@ -82,6 +81,15 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		return Boolean.TRUE;
 
 	}
+	
+	private boolean haveNetworkConnection() {
+		ConnectivityManager cm = (ConnectivityManager) taskListActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
+	    for (NetworkInfo ni : cm.getAllNetworkInfo()) {
+	        if ( (ni.getTypeName().equalsIgnoreCase("WIFI") || ni.getTypeName().equalsIgnoreCase("MOBILE") ) && ni.isConnected() )
+                return true;
+	    }
+	    return false;
+	}	
 
 	private void synchronizeTags(Context context, long lastSynchronisation) {
         publishProgress( "Synchronizing Tags List", null, -1 );
