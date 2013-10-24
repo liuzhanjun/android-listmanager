@@ -385,6 +385,13 @@ public class MainActivity extends Activity  {
 		startActivity(intent);
 	}
 	
+	public void openCompletedTasks( MenuItem view ) {
+		Intent intent = new Intent(this, CompletedTask.class);
+		startActivity(intent);
+	}
+	
+	
+	
 	public void openAddTask( MenuItem item ) {
 		Intent intent = new Intent(this, AddTaskActivity.class);
 		startActivity( intent );
