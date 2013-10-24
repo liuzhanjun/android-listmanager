@@ -134,7 +134,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 				try {
 					tagEntry.delete();
 				} catch (Exception e) {
-					e.printStackTrace();
+					throw new RuntimeException( "Unable to delete task: " + tagEntry.getId() + " (" + e.getMessage() + ")" );
 				}
 				ds.delete( localTag );
 			} else if ( localTag.getLastSynchroDate() == null || localTag.getLastSynchroDate().getTime() <= lastSynchronisation ) {
@@ -167,7 +167,9 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 				updateTagEntry( entry, localTask );
 		            try {
 						tagsFromGoogle.insert( entry );
-					} catch (Exception e) {}
+					} catch (Exception e) {
+						throw new RuntimeException( "Unable to insert task '" + localTask.getName() + "' in the google spreadsheet (" + e.getMessage() + ")" );
+					}
 				
 			}
 		}
@@ -211,13 +213,14 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 			Task localTask = taskMap.remove( googleTask.getId()  );
 			
 			if ( localTask == null ) {
+				googleTask.setId( null );
 				googleTask = ds.save( googleTask );
 				updateTaskEntry(taskEntry, googleTask);
 			} else if ( localTask.getStatus() == TaskStatus.DELETED ) {
 				try {
 					taskEntry.delete();
 				} catch (Exception e) {
-					e.printStackTrace();
+					throw new RuntimeException( "Unable to delete task: " + taskEntry.getId() + "(" + e.getMessage() + ")" );
 				}
 				ds.delete( localTask );
 			} else if ( localTask.getLastSynchroDate() == null || localTask.getLastSynchroDate().getTime() <= lastSynchronisation ) {
@@ -251,7 +254,9 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 				updateTaskEntry( entry, localTask );
 		            try {
 						tasksFromGoogle.insert( entry );
-					} catch (Exception e) {}
+					} catch (Exception e) {
+						throw new RuntimeException( "unable to insert task '" + localTask.getName() + "' to the google Spreadsheet ( " + e.getMessage() + ")" );
+					}
 				
 			}
 		}
@@ -318,11 +323,10 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	
 	
 	protected ListFeed readTasksGoogleSpreadsheet( Context context) {
-		try {
-			
-			SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
-			GoogleAccountInfo googleAccountInfo = new GoogleAccountInfo( sharedPreferences );
+		SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+		GoogleAccountInfo googleAccountInfo = new GoogleAccountInfo( sharedPreferences );
 
+		try {
             SpreadsheetService service = new SpreadsheetService("Testing");
             service.setUserCredentials(googleAccountInfo.getUsername(),  googleAccountInfo.getPassword() );
             
@@ -331,7 +335,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
             if ( googleAccountInfo.getTaskListFeed() == null || googleAccountInfo.getTaskListFeed().isEmpty() ) {
             	SpreadsheetEntry spreadsheet = openSpreadsheet( service );
             	
-                WorksheetEntry worksheet = spreadsheet.getWorksheets().get(0);
+                WorksheetEntry worksheet = spreadsheet.getWorksheets().get( 0 );
                 listFeedURL = worksheet.getListFeedUrl();
                 
                 googleAccountInfo.setTaskListFeed( listFeedURL.toString() );
@@ -342,6 +346,11 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 
             return service.getFeed( listFeedURL, ListFeed.class );
         } catch (Exception e) {
+        	/*
+        	 * Reset the List Feed caching, just in case it was the cause of the exception.
+        	 */
+            googleAccountInfo.setTaskListFeed( null );
+            googleAccountInfo.saveToPreferences( sharedPreferences );
         	throw new RuntimeException ( e );
         }		
 	}
@@ -365,6 +374,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
          * 'todo' spreadsheet not found on the google drive.
          */
         if ( spreadsheet == null ) {
+        	throw new RuntimeException( "Google Spreadsheet not found. You need to create a spreadsheet called 'todo' in your Google Drive." );
         	
         	// TODO: Add a new spreadsheet on the google drive.
 //        	 com.google.api.services.drive.model.File  file = new com.google.api.services.drive.model.File();
@@ -386,11 +396,11 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	}
 
 	protected ListFeed readTagsGoogleSpreadsheet( Context context) {
+
+		SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+		GoogleAccountInfo googleAccountInfo = new GoogleAccountInfo( sharedPreferences );
 		
 		try {
-			
-			SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
-			GoogleAccountInfo googleAccountInfo = new GoogleAccountInfo( sharedPreferences );
 
             SpreadsheetService service = new SpreadsheetService("Testing");
             service.setUserCredentials(googleAccountInfo.getUsername(),  googleAccountInfo.getPassword() );
@@ -427,8 +437,12 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 
             return service.getFeed( listFeedURL, ListFeed.class );
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        	/*
+        	 * Reset the List Feed caching, just in case it was the cause of the exception.
+        	 */
+            googleAccountInfo.setTagsFeed( null );
+            googleAccountInfo.saveToPreferences( sharedPreferences );
+        	throw new RuntimeException( e );
         }		
 	}
 	
