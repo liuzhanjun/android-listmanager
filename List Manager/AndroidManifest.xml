@@ -44,8 +44,7 @@
         </activity>
         <activity
             android:name="com.iceheart.listmanager.CompletedTask"
-            android:label="@string/title_activity_completed_task"
-            android:parentActivityName="com.iceheart.listmanager.MainActivity" >
+            android:label="@string/title_activity_completed_task">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.iceheart.listmanager.MainActivity" />
