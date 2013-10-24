@@ -19,9 +19,9 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.iceheart.listmanager.MainActivity"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:uiOptions="splitActionBarWhenNarrow" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,17 +30,25 @@
         </activity>
         <activity
             android:name="com.iceheart.listmanager.AddTaskActivity"
-            android:label="@string/title_activity_add_task">
+            android:label="@string/title_activity_add_task" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MasterListActivity" />
         </activity>
         <activity
             android:name="com.iceheart.listmanager.SettingsActivity"
-            android:label="@string/title_activity_settings">
+            android:label="@string/title_activity_settings" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MasterListActivity" />
+        </activity>
+        <activity
+            android:name="com.iceheart.listmanager.CompletedTask"
+            android:label="@string/title_activity_completed_task"
+            android:parentActivityName="com.iceheart.listmanager.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.iceheart.listmanager.MainActivity" />
         </activity>
     </application>
 

@@ -4,5 +4,6 @@
     <item android:id="@+id/synchronize" android:showAsAction="ifRoom" android:title="@string/synchronize" android:onClick="synchronizeWithGoogle" android:icon="@drawable/ic_refresh"></item>
     <item android:id="@+id/share" android:showAsAction="ifRoom" android:title="@string/share" android:icon="@drawable/ic_share" android:actionProviderClass="android.widget.ShareActionProvider"></item>
     <item android:id="@+id/Settings" android:title="@string/action_settings" android:showAsAction="ifRoom" android:onClick="openSettings" android:icon="@drawable/ic_options"></item>
+    <item android:id="@+id/completedTask" android:title="@string/completed_tasks" android:showAsAction="ifRoom" android:onClick="openCompletedTasks" android:icon="@drawable/ic_options"></item>
 
 </menu>
