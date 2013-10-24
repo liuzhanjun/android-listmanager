@@ -29,6 +29,7 @@
     <string name="password">Password</string>
     <string name="synchronize">Synchronize</string>
     <string name="syncOnStartup">Sync on Startup</string>
+    <string name="synchronization_failed">Synchronization Failed</string>
     <string name="yes">Yes</string>
     <string name="tags_must_be_specified">You must choose at least one tag.</string>
     <string name="task_name_mandatory">You must specify a task name</string>

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,6 +25,7 @@ import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.iceheart.listmanager.ApplicationSettings;
 import com.iceheart.listmanager.MainActivity;
+import com.iceheart.listmanager.R;
 import com.iceheart.listmanager.Tag;
 import com.iceheart.listmanager.TagDatasource;
 import com.iceheart.listmanager.TagStatus;
@@ -41,6 +43,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	
 	private ProgressDialog progressDialog;
 	private MainActivity taskListActivity;
+	private String lastException;
 
     public GoogleTaskSynchronizer( MainActivity activity ) {
 		this.taskListActivity = activity;
@@ -59,16 +62,21 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		Context context = params[0];
 		
 		if ( !haveNetworkConnection() ) {
+			lastException = "No Network connection";
 			return Boolean.FALSE;
 		}
 		
 		SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
 		long lastSynchronisation = sharedPreferences.getLong( ApplicationSettings.LAST_SYNCHRONIZATION, -1 );
 		
+		try {
 		
-		synchronizeTaskList(context, lastSynchronisation);
-		synchronizeTags( context, lastSynchronisation );
-
+			synchronizeTaskList(context, lastSynchronisation);
+			synchronizeTags( context, lastSynchronisation );
+		} catch ( Exception e ) {
+			lastException = e.getMessage();
+			return false;
+		}
 		
 		/*
 		 * Update the synchronization date in the shared preferences.
@@ -159,10 +167,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 				updateTagEntry( entry, localTask );
 		            try {
 						tagsFromGoogle.insert( entry );
-					} catch (Exception e) {
-						// TODO Exception handling
-						e.printStackTrace();
-					}
+					} catch (Exception e) {}
 				
 			}
 		}
@@ -246,10 +251,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 				updateTaskEntry( entry, localTask );
 		            try {
 						tasksFromGoogle.insert( entry );
-					} catch (Exception e) {
-						// TODO Exception handling
-						e.printStackTrace();
-					}
+					} catch (Exception e) {}
 				
 			}
 		}
@@ -340,8 +342,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 
             return service.getFeed( listFeedURL, ListFeed.class );
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        	throw new RuntimeException ( e );
         }		
 	}
 	
@@ -385,6 +386,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	}
 
 	protected ListFeed readTagsGoogleSpreadsheet( Context context) {
+		
 		try {
 			
 			SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
@@ -442,6 +444,14 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	protected void onPostExecute(Boolean result) {
 		progressDialog.dismiss();
 		taskListActivity.refreshList();
+		
+		if ( !result ) {
+			 AlertDialog.Builder builder = new AlertDialog.Builder(taskListActivity );
+       	  	 builder.setTitle(R.string.synchronization_failed);
+       	  	 builder.setMessage( lastException );
+       	  	 AlertDialog dlg= builder.create();
+       	  	 dlg.show();
+		}
 	}
 
     @Override
