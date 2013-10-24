@@ -23,7 +23,7 @@
             android:id="@+id/rowTagName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="5dp"
+            android:padding="5dp"
             android:focusable="false"
             android:singleLine="true"
             android:textAppearance="@style/menuText" />
@@ -33,10 +33,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:gravity="center"
         android:layout_marginRight="5dp"
         android:layout_marginLeft="5dp"
+        android:width="24dp"
+        android:height="24dp"
         android:focusable="false"
         android:singleLine="true"
-        android:textAppearance="@style/menuText" />
+        android:textAppearance="@style/menuTextCount"
+        android:background="@drawable/row_tag_color_background"/>
 
 </RelativeLayout>

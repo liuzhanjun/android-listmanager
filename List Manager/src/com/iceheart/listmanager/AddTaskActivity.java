@@ -19,6 +19,12 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
+import com.iceheart.listmanager.tag.Tag;
+import com.iceheart.listmanager.tag.TagDatasource;
+import com.iceheart.listmanager.tag.TagType;
+import com.iceheart.listmanager.task.Task;
+import com.iceheart.listmanager.task.TaskDatasource;
+
 public class AddTaskActivity extends Activity {
 	
 	private Task task;

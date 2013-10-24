@@ -1,9 +1,7 @@
 package com.iceheart.listmanager;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,29 +19,34 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
+import com.iceheart.listmanager.tag.Tag;
+import com.iceheart.listmanager.tag.TagDatasource;
+import com.iceheart.listmanager.tag.TagRowAdapter;
+import com.iceheart.listmanager.tag.TagStatus;
+import com.iceheart.listmanager.tag.TagType;
+import com.iceheart.listmanager.task.Task;
+import com.iceheart.listmanager.task.TaskDatasource;
+import com.iceheart.listmanager.task.TaskRowAdapter;
+import com.iceheart.listmanager.task.TaskStatus;
 
 public class MainActivity extends Activity  {
 	
+	public static Tag selectedTag = new Tag(  TagType.SYSTEM_COMING_SOON );
+	private static boolean firstLoad = true;
 	private List<Task> tasks;
 	private List<Tag> tags;
-	private static boolean firstLoad = true;
-	public static Tag selectedTag = new Tag(  TagType.SYSTEM_COMING_SOON );
 	private ListView listView;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +112,6 @@ public class MainActivity extends Activity  {
         return super.onOptionsItemSelected(item);
     }
     
-    
     /**
      * Synchronize The Task list with the google account.
      * 
@@ -155,66 +157,12 @@ public class MainActivity extends Activity  {
         setTitle( title );
         setShareContent( tasks );
         
-        List<Map<String, String>> mylist = new ArrayList<Map<String, String>>();
+        List<Map<String, Object>> mylist = new ArrayList<Map<String,Object>>();
         for ( Task task: tasks ) {
             mylist.add(task.toMap());
         }
 
-        SimpleAdapter adapter = new SimpleAdapter(this, mylist, R.layout.row,
-                new String[] {"name", "price", "formattedDueDate" }, new int[] {R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate}) {
-
-            private Calendar today = Calendar.getInstance();
-
-            {
-                today.setTime(new Date() );
-                today.set( Calendar.HOUR_OF_DAY, 0 );
-                today.set( Calendar.MINUTE, 0 );
-                today.set( Calendar.SECOND, 0 );
-                today.set( Calendar.MILLISECOND, 0 );
-                today.set( Calendar.MILLISECOND, 0 );
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-
-                Map<String, Object> entry = (Map<String, Object>) this.getItem(position);
-                String itemDueDate = (String)entry.get("dueDate");
-                if ( itemDueDate != null && itemDueDate.length() > 0 ) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
-
-                    ImageView itemImageView = (ImageView) view.findViewById(R.id.rowFlag);
-                    try {
-                        Calendar date = Calendar.getInstance();
-                        date.setTime( simpleDateFormat.parse(itemDueDate) );
-                        date.set( Calendar.HOUR_OF_DAY, 0 );
-                        date.set( Calendar.MINUTE, 0 );
-                        date.set( Calendar.SECOND, 0 );
-                        date.set( Calendar.MILLISECOND, 0 );
-
-                        if ( date.before(today) ) {
-                            itemImageView.setImageResource(R.drawable.ic_overdue);
-                        } else if ( date.equals(today)) {
-                            itemImageView.setImageResource(R.drawable.ic_due_today);
-                        } else {
-                            itemImageView.setImageResource(0);
-                        }
-                    } catch (Exception e) {
-                        itemImageView.setImageResource(0);
-                    }
-                }
-
-                String itemPrice = (String)entry.get("price");
-                TextView itemTextView = (TextView) view.findViewById(R.id.rowItemPrice);
-                if ( itemPrice != null && itemPrice.length() > 0 ) {
-                    itemTextView.setBackgroundResource(R.drawable.row_price_background);
-                } else {
-                    itemTextView.setBackgroundResource(0);
-                }
-
-                return view;
-            }
-        };
+        SimpleAdapter adapter = new TaskRowAdapter(this, mylist);
 
         listView.setAdapter( adapter );
 	}
@@ -248,27 +196,7 @@ public class MainActivity extends Activity  {
         mylist.add( new Tag( TagType.SYSTEM_NEW_TAG ).toMap() );        
         
         final ListView tagListView = (ListView) findViewById(R.id.tagsList);
-        tagListView.setAdapter(new SimpleAdapter(this, mylist, R.layout.tag_row,
-                new String[] {"name", "taskCount" }, new int[] {R.id.rowTagName, R.id.rowTagTaskCount}){
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-
-                ImageView iconView = (ImageView) view.findViewById(R.id.rowTagIcon);
-
-                Tag entry = (Tag) ((Map<String, Object>)this.getItem(position)).get("tag");
-
-                if ( entry != null ) {
-                    int resourceId = entry.getIconId();
-//                    if ( resourceId != -1)
-                    iconView.setImageResource(resourceId);
-                }
-
-                return view;
-            }
-
-        });
+        tagListView.setAdapter(new TagRowAdapter(this, mylist));
         
         
         tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {
@@ -379,7 +307,6 @@ public class MainActivity extends Activity  {
         return true;
     }
     
-
 	public void openAddTask( View view ) {
 		Intent intent = new Intent(this, AddTaskActivity.class);
 		startActivity(intent);
@@ -487,6 +414,13 @@ public class MainActivity extends Activity  {
 		return buffer.toString();
 		
 	}
-	
 
+    public Tag getUserDefinedTagWithName( String name) {
+        for( Tag tag : tags ) {
+            if (tag.getType() == TagType.USER_DEFINED && tag.getName().equalsIgnoreCase( name ) ) {
+                return tag;
+            }
+        }
+        return null;
+    }
 }

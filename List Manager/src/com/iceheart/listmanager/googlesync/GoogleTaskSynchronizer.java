@@ -1,11 +1,5 @@
 package com.iceheart.listmanager.googlesync;
 
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -26,12 +20,18 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.iceheart.listmanager.ApplicationSettings;
 import com.iceheart.listmanager.MainActivity;
 import com.iceheart.listmanager.R;
-import com.iceheart.listmanager.Tag;
-import com.iceheart.listmanager.TagDatasource;
-import com.iceheart.listmanager.TagStatus;
-import com.iceheart.listmanager.Task;
-import com.iceheart.listmanager.TaskDatasource;
-import com.iceheart.listmanager.TaskStatus;
+import com.iceheart.listmanager.tag.Tag;
+import com.iceheart.listmanager.tag.TagDatasource;
+import com.iceheart.listmanager.tag.TagStatus;
+import com.iceheart.listmanager.task.Task;
+import com.iceheart.listmanager.task.TaskDatasource;
+import com.iceheart.listmanager.task.TaskStatus;
+
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Class responsible to synchronize the task list with the google spreadsheet.

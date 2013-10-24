@@ -68,6 +68,18 @@
             android:singleLine="true"
             android:layout_gravity="right"
             android:textAppearance="@style/amountText" />
+
+        <ListView
+            android:id="@+id/tagColorView"
+            android:layout_width="@dimen/row_tag_width"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="1dp"
+            android:focusable="false"
+            android:layout_gravity="fill|top"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="1px"
+            />
+
     </LinearLayout>
 
 </RelativeLayout>

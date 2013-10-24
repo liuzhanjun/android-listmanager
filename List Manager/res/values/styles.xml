@@ -39,6 +39,12 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="menuTextCount">
+        <item name="android:textColor">#ddd</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <color name="drawerDivider">#ccc</color>
     <color name="drawerBackground">#dfdfdf</color>
 </resources>
