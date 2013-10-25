@@ -1,11 +1,5 @@
 package com.iceheart.listmanager;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,6 +10,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +32,12 @@ import com.iceheart.listmanager.task.Task;
 import com.iceheart.listmanager.task.TaskDatasource;
 import com.iceheart.listmanager.task.TaskRowAdapter;
 import com.iceheart.listmanager.task.TaskStatus;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends Activity  {
 	
@@ -425,9 +426,11 @@ public class MainActivity extends Activity  {
     public Tag getUserDefinedTagWithName( String name) {
         for( Tag tag : tags ) {
             if (tag.getType() == TagType.USER_DEFINED && tag.getName().equalsIgnoreCase( name ) ) {
+                Log.d("getUserDefinedTagWithName", "found tag with name:" + name );
                 return tag;
             }
         }
+        Log.d("getUserDefinedTagWithName", "did NOT find tag with name:" + name );
         return null;
     }
 }

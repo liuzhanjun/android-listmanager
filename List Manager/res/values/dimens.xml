@@ -9,6 +9,10 @@
     <dimen name="row_img_width">32dp</dimen>
     <dimen name="row_img_height">28dp</dimen>
     <dimen name="row_tag_width">12dp</dimen>
+    <dimen name="row_margin_left">15dp</dimen>
+    <dimen name="row_margin_right">120dp</dimen>
+    <dimen name="row_price_width">108dp</dimen>
+    <dimen name="row_price_divider_padding">5dp</dimen>
 
     <dimen name="drawer_width">250dp</dimen>
     <dimen name="drawer_divider_height">1dp</dimen>

@@ -1,6 +1,7 @@
 package com.iceheart.listmanager.task;
 
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import com.iceheart.listmanager.R;
 import com.iceheart.listmanager.tag.Tag;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -80,45 +83,55 @@ public class TaskRowAdapter extends SimpleAdapter {
 
         Task task = (Task)entry.get("task");
         List<String> tags = task.getTags();
-        ListView tagsImageView = (ListView) view.findViewById(R.id.tagColorView);
+        ListView tagsListView = (ListView) view.findViewById(R.id.tagColorView);
         if ( tags.size() > 0 ) {
-            if ( tagsImageView != null ) {
+            if ( tagsListView != null ) {
+                Log.d("tagsImageView,setAdapter", "number of rows in the tagslist:" + tags.size());
+                ArrayList<String> tags2 = new ArrayList<String>();
+                tags2.addAll(tags);
 
-                tagsImageView.setAdapter( new ArrayAdapter<String>(mainActivity, R.layout.row_color, tags) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        ImageView row;
-                        if (null == convertView) {
-                            LayoutInflater inflater = mainActivity.getLayoutInflater();
-                            row = (ImageView) inflater.inflate(R.layout.row_color, null);
-                        } else {
-                            row = (ImageView) convertView;
-                        }
-
-                        int height = 30 / this.getCount();
-                        row.setMaxHeight( height );
-                        row.setMinimumHeight( height );
-                        row.setMinimumWidth( 5 );
-
-                        // Fetch the tag color
-                        GradientDrawable back = (GradientDrawable) row.getBackground();
-
-                        Tag tag = mainActivity.getUserDefinedTagWithName(getItem(position));
-                        if ( tag != null ) {
-                            back.setColor(mainActivity.getResources().getColor(tag.getTagColor()));
-                        } else {
-                            back.setColor(mainActivity.getResources().getColor(android.R.color.transparent));
-                        }
-
-                        return row;
-                    }
-                });
-
+                tagsListView.setAdapter(new TagColorViewAdapter(tags2));
+                Log.d("tagsImageView,setAdapter", "width=" + tagsListView.getWidth());
+                Log.d("tagsImageView,setAdapter", "height=" + tagsListView.getHeight() );
             }
         } else {
-            tagsImageView.setBackgroundResource(android.R.color.transparent);
+            Log.d("tagsImageView,setAdapter", "transparent:" + tags.size());
+            tagsListView.setBackgroundResource(android.R.color.transparent);
         }
 
         return view;
+    }
+
+    private class TagColorViewAdapter extends ArrayAdapter<String> {
+        public TagColorViewAdapter(List<String> tags) {
+            super(TaskRowAdapter.this.mainActivity, R.layout.row_color, tags);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                LayoutInflater inflater = mainActivity.getLayoutInflater();
+                convertView = inflater.inflate(R.layout.row_color, null);
+            }
+
+            int count = this.getCount();
+            int height = 30 / count;
+//            convertView.setMaxHeight( height );
+            convertView.setMinimumHeight( height );
+            convertView.setMinimumWidth( 5 );
+
+            Log.d("tagsImageView.setAdapter.getView", "getCount=" + count + ", position=" + position);
+            // Fetch the tag color
+            GradientDrawable back = (GradientDrawable) convertView.getBackground();
+
+            Tag tag = mainActivity.getUserDefinedTagWithName(this.getItem(position));
+            if ( tag != null ) {
+                back.setColor(mainActivity.getResources().getColor(tag.getTagColor()));
+            } else {
+                back.setColor(mainActivity.getResources().getColor(android.R.color.transparent));
+            }
+
+            return convertView;
+        }
     }
 }

@@ -4,31 +4,43 @@
     android:layout_height="wrap_content"
     android:focusable="false"
     android:height="@dimen/row_height"
-    android:paddingLeft="10dp"
     android:padding="8dp"
+    android:paddingLeft="10dp"
     android:background="@drawable/border"
     android:descendantFocusability="blocksDescendants"
     >
 
+    <ListView
+        android:id="@+id/tagColorView"
+        android:layout_width="@dimen/row_tag_width"
+        android:layout_height="@dimen/row_height"
+        android:layout_gravity="left|top"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="1px"
+        android:focusable="false"
+        />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_height="match_parent"
-        android:focusable="false"
-        android:layout_gravity="left"
         android:layout_width="wrap_content"
-        android:layout_marginRight="120dp"
+        android:layout_gravity="left"
+        android:layout_marginRight="@dimen/row_margin_right"
+        android:layout_marginLeft="@dimen/row_margin_left"
         android:layout_alignParentRight="false"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:focusable="false"
+        >
 
         <TextView
             android:id="@+id/rowItemName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:focusable="false"
             android:layout_gravity="left"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:textAppearance="@style/titleText"
+            android:focusable="false"
             android:singleLine="true"
             android:ellipsize="end" />
 
@@ -37,49 +49,40 @@
             android:id="@+id/rowItemDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="fill|top"
             android:ellipsize="marquee"
             android:focusable="false"
             android:textAppearance="@style/dateText"
             android:singleLine="true"
-            android:layout_gravity="fill|top"
             android:numeric="decimal" />
     </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_height="match_parent"
-        android:focusable="false"
+        android:layout_width="@dimen/row_price_width"
         android:layout_gravity="right"
-        android:layout_width="110dp"
         android:layout_alignParentRight="true"
-        android:dividerPadding="5dp" >
+        android:dividerPadding="@dimen/row_price_divider_padding"
+        android:focusable="false"
+        >
 
         <ImageView
             android:id="@+id/rowFlag"
             android:layout_width="@dimen/row_img_width"
             android:layout_height="@dimen/row_img_height"
+            android:layout_gravity="fill|top"
             android:focusable="false"
-            android:layout_gravity="fill|top" />
+            />
 
         <TextView
             android:id="@+id/rowItemPrice"
-            android:layout_width="70dp"
+            android:layout_width="75dp"
             android:layout_height="wrap_content"
+            android:gravity="right"
             android:focusable="false"
             android:singleLine="true"
-            android:gravity="right"
             android:textAppearance="@style/amountText" />
-
-        <ListView
-            android:id="@+id/tagColorView"
-            android:layout_width="@dimen/row_tag_width"
-            android:layout_height="fill_parent"
-            android:layout_marginLeft="1dp"
-            android:focusable="false"
-            android:layout_gravity="fill|top"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="1px"
-            />
 
     </LinearLayout>
 
