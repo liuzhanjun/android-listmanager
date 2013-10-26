@@ -157,7 +157,6 @@ public class AddTaskActivity extends Activity {
 		
 		task.setLastSynchroDate( new Date() );
 
-		// TODO: open ds on create.
 		TaskDatasource ds = new TaskDatasource(this );
 		ds.open();
 		ds.save( task );
