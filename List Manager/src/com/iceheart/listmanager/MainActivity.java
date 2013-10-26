@@ -314,7 +314,7 @@ public class MainActivity extends Activity  {
 	}
 	
 	public void openCompletedTasks( MenuItem view ) {
-		Intent intent = new Intent(this, CompletedTask.class);
+		Intent intent = new Intent(this, CompletedTaskActivity.class);
 		startActivity(intent);
 	}
 	
