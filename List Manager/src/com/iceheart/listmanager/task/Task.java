@@ -283,4 +283,8 @@ public class Task implements Serializable {
 		setRealPrice( bd );
 	}
 
+    public boolean isCompleted() {
+        // TODO calculate this
+        return false;
+    }
 }
