@@ -16,22 +16,15 @@
     <string name="share">Share</string>
     <string name="title_activity_add_task">AddTask</string>
     <string name="item_name">Item Name</string>
-    <string name="save">Save</string>
     <string name="dlgTask_title">TODO</string>
-    <string name="dlgTask_markComplete">Mark as completed</string>
-    <string name="dlgTask_delete">Delete</string>
     <string name="price">Price</string>
     <string name="dueDate">Due Date</string>
-    <string name="cancel">Cancel</string>
-    <string name="showDetails">Edit</string>
-    <string name="update">Update</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="googleAccount">Google Account</string>
     <string name="password">Password</string>
     <string name="synchronize">Synchronize</string>
     <string name="syncOnStartup">Sync on Startup</string>
     <string name="synchronization_failed">Synchronization Failed</string>
-    <string name="yes">Yes</string>
     <string name="tags_must_be_specified">You must choose at least one tag.</string>
     <string name="task_name_mandatory">You must specify a task name</string>
     <string name="validation_failed">Validation Failed</string>
@@ -48,6 +41,24 @@
     <string name="title_activity_tag">Tags</string>
     <string name="title_master_list">Details</string>
     <string name="title_master_detail">Master Detail</string>
-    <string name="title_activity_completed_task">CompletedTask</string>
+    <string name="title_activity_completed_task">Completed Task</string>
+    <string name="title_allTasks">All Tasks</string>
+
+    <string name="tab_all">%1$s</string>
+    <string name="tab_active">Active (%1$s)</string>
+    <string name="tab_completed">Completed (%1$s)</string>
+
+    <string name="suffix_items"> items</string>
+    <string name="suffix_item"> item</string>
+
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_markComplete">Mark as completed</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_showDetails">Edit</string>
+    <string name="btn_update">Update</string>
+
 
 </resources>

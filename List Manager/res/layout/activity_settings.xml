@@ -57,7 +57,7 @@
         android:layout_alignBottom="@+id/btnSaveSaveSettings"
         android:layout_toRightOf="@+id/btnSaveSaveSettings"
         android:onClick="cancelSettings"
-        android:text="@string/cancel" />
+        android:text="@string/btn_cancel" />
 
     <Button
         android:id="@+id/btnSaveSaveSettings"
@@ -67,7 +67,7 @@
         android:layout_below="@+id/txtPassword"
         android:layout_marginTop="66dp"
         android:onClick="saveSettings"
-        android:text="@string/save" />
+        android:text="@string/btn_save" />
 
     <TextView
         android:id="@+id/lblSyncOnStartup"

@@ -1,0 +1,10 @@
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/taskList"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentTop="true"
+    android:divider="@android:color/transparent"
+    android:dividerHeight="@dimen/drawer_divider_height"/>

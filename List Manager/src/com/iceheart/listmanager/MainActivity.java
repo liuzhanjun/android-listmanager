@@ -1,19 +1,27 @@
 package com.iceheart.listmanager;
 
-import android.app.Activity;
+import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -39,32 +47,89 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends Activity  {
+public class MainActivity extends FragmentActivity  {
 	
-	public static Tag selectedTag = new Tag(  TagType.SYSTEM_COMING_SOON );
+	public static Tag selectedTag = new Tag( TagType.SYSTEM_COMING_SOON );
 	private static boolean firstLoad = true;
 	private List<Task> tasks;
 	private List<Tag> tags;
-	private ListView listView;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
+    private ViewPager mViewPager;
+//    private ActionBar.Tab allTasksTab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        listView = (ListView) findViewById(R.id.taskList);
-        
+
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle( this,  drawerLayout, R.drawable.ic_drawer,  0,0 ) {};
 
         // Set the drawer toggle as the DrawerListener
         drawerLayout.setDrawerListener(toggle);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);  
-        
-        
+        // ViewPager and its adapters use support library fragments, so use getSupportFragmentManager.
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+
+        final ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+/*
+            // Specify that tabs should be displayed in the action bar.
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            // Create a tab listener that is called when the user changes tabs.
+            ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+                @Override
+                public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+                    // When the tab is selected, switch to the
+                    // corresponding page in the ViewPager.
+                    mViewPager.setCurrentItem(tab.getPosition());
+                }
+
+                @Override
+                public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+                }
+
+                @Override
+                public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+                }
+            };
+
+            // Add 3 tabs, specifying the tab's text and TabListener
+            allTasksTab = actionBar.newTab();
+            allTasksTab.setText(getString(R.string.tab_all, selectedTag.getName()));
+            allTasksTab.setTabListener(tabListener);
+            actionBar.addTab(allTasksTab);
+
+            ActionBar.Tab activeTasksTab = actionBar.newTab();
+            activeTasksTab.setText(getString(R.string.tab_active, selectedTag.getName()));
+            activeTasksTab.setTabListener(tabListener);
+            actionBar.addTab(activeTasksTab);
+
+            ActionBar.Tab completedTasksTab = actionBar.newTab();
+            completedTasksTab.setText(getString(R.string.tab_completed, selectedTag.getName()));
+            completedTasksTab.setTabListener(tabListener);
+            actionBar.addTab(completedTasksTab);
+*/
+        }
+
+
+        // Create a swipe listener to change the tab selected on swipe
+/*
+        mViewPager.setOnPageChangeListener(
+            new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    // When swiping between pages, select the
+                    // corresponding tab.
+                    getActionBar().setSelectedNavigationItem(position);
+                }
+            });
+*/
         SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
 		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
 		if ( googleAccount.isEmpty() ) {
@@ -72,9 +137,11 @@ public class MainActivity extends Activity  {
 			return;
 		}
 
-        refreshList();
+        // Refresh task List
+        refreshTaskList();
+        // Refresh Tag List
 		refreshTagList();
-        
+
         /*
          * Google Synchronization on startup (If settings says so)
          */
@@ -86,18 +153,6 @@ public class MainActivity extends Activity  {
             firstLoad = false;
             toggle.syncState();
         }
-        
-        
-
-        listView.setOnItemClickListener(new OnItemClickListener() {
-        	
-            public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
-              @SuppressWarnings("unchecked")
-			Map<String,String> selectedTask = (Map<String,String>) (listView.getItemAtPosition(myItemInt));
-              showTaskDialog( selectedTask );
-
-            }
-        });
         
     }
     
@@ -124,10 +179,10 @@ public class MainActivity extends Activity  {
          synchronizer.execute( this );
     }
     
-	public void refreshList() {
+	public void refreshTaskList() {
 		TaskDatasource ds = new TaskDatasource( this);
         ds.open();
-        
+
         if ( selectedTag == null || selectedTag.getType() == TagType.SYSTEM_ALL ) {
             tasks = ds.getAllActiveTasks();
         } else if ( selectedTag.getType() == TagType.SYSTEM_COMING_SOON) {
@@ -142,7 +197,7 @@ public class MainActivity extends Activity  {
         if ( tasks.size() > 0 ) {
         	
             title += " (" + tasks.size();
-            title += tasks.size() > 1? " items": " item";
+            title += tasks.size() > 1? getString(R.string.suffix_items):getString(R.string.suffix_item);
             BigDecimal totalPrice = new BigDecimal( 0 );
             for ( Task task: tasks ) {
             	if ( task.getEstimatedPrice() != null ) {
@@ -157,15 +212,16 @@ public class MainActivity extends Activity  {
         }
         setTitle( title );
         setShareContent( tasks );
-        
-        List<Map<String, Object>> mylist = new ArrayList<Map<String,Object>>();
-        for ( Task task: tasks ) {
-            mylist.add(task.toMap());
-        }
 
-        SimpleAdapter adapter = new TaskRowAdapter(this, mylist);
+        // Create a new set of pages for the tabs based on the new allTasksForTag list
+        CollectionPagerAdapter pagerAdapter = new CollectionPagerAdapter(this, selectedTag, tasks, getSupportFragmentManager());
+        mViewPager.setAdapter(pagerAdapter);
 
-        listView.setAdapter( adapter );
+        // Set the actionBar item to the correct selected tab
+/*
+        allTasksTab.setText( selectedTag.getName() );
+        getActionBar().selectTab(allTasksTab);
+*/
 	}
 	
 	public void refreshTagList() {
@@ -187,17 +243,17 @@ public class MainActivity extends Activity  {
         }       
         ds.close();
         
-        List<Map<String, Object>> mylist = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> tags = new ArrayList<Map<String, Object>>();
         
-        mylist.add( new Tag( TagType.SYSTEM_ALL ).toMap() );
-        mylist.add( new Tag( TagType.SYSTEM_COMING_SOON ).toMap() );
-        for ( Tag tag: tags ) {
-            mylist.add(tag.toMap());
+        tags.add(new Tag(TagType.SYSTEM_ALL).toMap());
+        tags.add(new Tag(TagType.SYSTEM_COMING_SOON).toMap());
+        for ( Tag tag: this.tags) {
+            tags.add(tag.toMap());
         }
-        mylist.add( new Tag( TagType.SYSTEM_NEW_TAG ).toMap() );        
+        tags.add(new Tag(TagType.SYSTEM_NEW_TAG).toMap());
         
         final ListView tagListView = (ListView) findViewById(R.id.tagsList);
-        tagListView.setAdapter(new TagRowAdapter(this, mylist));
+        tagListView.setAdapter(new TagRowAdapter(this, tags));
         
         
         tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {
@@ -216,7 +272,7 @@ public class MainActivity extends Activity  {
 				 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
            	  	 builder.setTitle(R.string.delete_tag);
            	  	 builder.setMessage( R.string.delete_tag_confirmation );
-           	  	 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() { 
+           	  	 builder.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
            	      
            	  		 @Override
            	  		 public void onClick(DialogInterface dialog, int which) {
@@ -230,7 +286,7 @@ public class MainActivity extends Activity  {
            	  		 }
            	  	 });
            	  	 
-	           	 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	           	 builder.setNegativeButton(getString(R.string.btn_cancel), new DialogInterface.OnClickListener() {
 	           	      @Override
 	           	      public void onClick(DialogInterface dialog, int which) {
 	           	          dialog.cancel();
@@ -250,7 +306,7 @@ public class MainActivity extends Activity  {
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
               Map<String,Object> selectedTagObj = (Map<String,Object>) (tagListView.getItemAtPosition(myItemInt));
-              selectedTag = (Tag) selectedTagObj.get( "tag");
+              selectedTag = (Tag) selectedTagObj.get("tag");
               
               
               if ( selectedTag.getType() == TagType.SYSTEM_NEW_TAG ) {
@@ -263,7 +319,7 @@ public class MainActivity extends Activity  {
             	  builder.setView(input);
 
             	  // Set up the buttons
-            	  builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
+            	  builder.setPositiveButton(getString(R.string.btn_ok), new DialogInterface.OnClickListener() {
             	      @Override
             	      public void onClick(DialogInterface dialog, int which) {
             	  		TagDatasource ds = new TagDatasource( MainActivity.this );
@@ -274,7 +330,7 @@ public class MainActivity extends Activity  {
             	        refreshTagList();
             	      }
             	  });
-            	  builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            	  builder.setNegativeButton(getString(R.string.btn_cancel), new DialogInterface.OnClickListener() {
             	      @Override
             	      public void onClick(DialogInterface dialog, int which) {
             	          dialog.cancel();
@@ -283,7 +339,7 @@ public class MainActivity extends Activity  {
 
             	  builder.show();
               } else {
-                  refreshList();
+                  refreshTaskList();
                   mDrawerLayout.closeDrawers();
               }
               
@@ -301,7 +357,7 @@ public class MainActivity extends Activity  {
         mShareActionProvider = (ShareActionProvider) item.getActionProvider();
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent() );
+        shareIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent(tasks) );
         shareIntent.setType("text/plain");
         mShareActionProvider.setShareIntent(shareIntent);
         
@@ -334,7 +390,7 @@ public class MainActivity extends Activity  {
 		
     	AlertDialog.Builder builder = new AlertDialog.Builder( this );
     	builder.setMessage( task.getNotes());
-    	builder.setNeutralButton(R.string.dlgTask_markComplete, 
+    	builder.setNeutralButton(R.string.btn_markComplete,
     			new DialogInterface.OnClickListener() {
             		@Override
             		public void onClick(DialogInterface dialog, int id) {
@@ -343,14 +399,14 @@ public class MainActivity extends Activity  {
             			 ds.open();
             			 ds.save( task );
             		     ds.close();
-           	   		     refreshList();
+           	   		     refreshTaskList();
             		     
-            		}
+                    }
     			}
-            	);
+        );
     	
     	
-    	builder.setNegativeButton(R.string.dlgTask_delete, new DialogInterface.OnClickListener() {
+    	builder.setNegativeButton(R.string.btn_delete, new DialogInterface.OnClickListener() {
     		@Override
     		public void onClick(DialogInterface dialog, int id) {
     			task.setStatus(TaskStatus.DELETED);
@@ -358,13 +414,13 @@ public class MainActivity extends Activity  {
 	   			 ds.open();
 	   			 ds.save( task );
 	   		     ds.close();         
-   	   		     refreshList();
+   	   		     refreshTaskList();
 
     		}
 		}
     	);
     	
-    	builder.setPositiveButton(R.string.showDetails,new DialogInterface.OnClickListener() {
+    	builder.setPositiveButton(R.string.btn_showDetails,new DialogInterface.OnClickListener() {
     		@Override
     		public void onClick(DialogInterface dialog, int id) {
     			Intent intent = new Intent(MainActivity.this, AddTaskActivity.class);
@@ -393,19 +449,19 @@ public class MainActivity extends Activity  {
 		
 		Intent sendIntent = new Intent();
 		sendIntent.setAction(Intent.ACTION_SEND);
-		sendIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent() );
+		sendIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent(tasks) );
 		sendIntent.setType("text/plain");
 		mShareActionProvider.setShareIntent( sendIntent );
 	}
 	
-	private String getShareListContent() {
+	private String getShareListContent(List<Task> tasks) {
 		
 		StringBuffer buffer = new StringBuffer();
 		
 		if ( selectedTag != null ) {
-			buffer.append( selectedTag.getName() + " (" + selectedTag.getTaskCount() + " items)" );
+			buffer.append( selectedTag.getName() + " (" + selectedTag.getTaskCount() + getString(R.string.suffix_items) + ")" );
 		} else {
-			buffer.append( "All Tasks" );
+			buffer.append( getString(R.string.title_allTasks));
 		}
 		buffer.append( "\n\n" );
 		
@@ -432,5 +488,127 @@ public class MainActivity extends Activity  {
         }
         Log.d("getUserDefinedTagWithName", "did NOT find tag with name:" + name );
         return null;
+    }
+
+    // Since this is an object collection, use a FragmentStatePagerAdapter,
+    // and NOT a FragmentPagerAdapter.
+    public static class CollectionPagerAdapter extends FragmentStatePagerAdapter {
+        private final MainActivity mainActivity;
+        private Tag tag;
+        private List<Task> tasksForTag;
+        private List<Task> incompleteTasksForTag;
+        private List<Task> completedTasksForTag;
+
+
+        public CollectionPagerAdapter(MainActivity mainActivity, Tag tag, List<Task> allTasksForTag, FragmentManager fm) {
+            super(fm);
+
+            this.mainActivity = mainActivity;
+            this.tag = tag;
+            setTaskList(allTasksForTag);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            ListFragment fragment = new ListFragment( mainActivity );
+            switch( position ) {
+                default:
+                case 0:
+                    fragment.setArgObject(tasksForTag);
+                    break;
+                case 1:
+                    fragment.setArgObject(incompleteTasksForTag);
+                    break;
+                case 2:
+                    fragment.setArgObject(completedTasksForTag);
+                    break;
+            }
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch( position ) {
+                default:
+                case 0:
+                    return mainActivity.getString(R.string.tab_all, tag.getName());
+                case 1:
+                    return mainActivity.getString(R.string.tab_active, tag.getName());
+                case 2:
+                    return mainActivity.getString(R.string.tab_completed, tag.getName());
+            }
+        }
+
+        private void setTaskList( List<Task> tasks ) {
+            this.tasksForTag = tasks;
+
+            // Create filtered lists active (incompleteTasksForTag)
+            // Create filtered lists completedTasksForTag
+            this.incompleteTasksForTag = new ArrayList<Task>();
+            this.completedTasksForTag = new ArrayList<Task>();
+            for( Task task : tasks ) {
+                if ( !task.isCompleted() ) {
+                    incompleteTasksForTag.add(task);
+                } else {
+                    completedTasksForTag.add(task);
+                }
+            }
+
+        }
+    }
+
+    // Instances of this class are fragments representing a single
+    // object in our collection.
+    public static class ListFragment extends Fragment {
+        private final MainActivity mainActivity;
+        private List<Task> tasks;
+
+        public ListFragment(MainActivity mainActivity) {
+            this.mainActivity = mainActivity;
+        }
+
+        public void setArgObject( List<Task> tasks ) {
+            this.tasks = tasks;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater,
+                                 ViewGroup container, Bundle savedInstanceState) {
+
+            final ListView listView = (ListView) inflater.inflate( R.layout.task_list, container, false );
+
+            // Add the click listener to view/edit the taks
+            if (listView != null) {
+                listView.setOnItemClickListener(new OnItemClickListener() {
+
+                    public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
+                        @SuppressWarnings("unchecked")
+                        Map<String,String> selectedTask = (Map<String,String>) (listView.getItemAtPosition(myItemInt));
+                        mainActivity.showTaskDialog(selectedTask);
+
+                    }
+                });
+            }
+
+            // Convert the allTasksForTag to maps for the list view
+            List<Map<String, Object>> adapterList = new ArrayList<Map<String,Object>>();
+            for ( Task task: tasks ) {
+                adapterList.add(task.toMap());
+            }
+
+            // Create the adapter for the list view
+            SimpleAdapter adapter = new TaskRowAdapter(mainActivity, adapterList);
+
+            listView.setAdapter( adapter );
+
+            return listView;
+
+        }
+
     }
 }

@@ -17,7 +17,6 @@ import com.iceheart.listmanager.tag.Tag;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +31,7 @@ public class TaskRowAdapter extends SimpleAdapter {
     private Calendar today;
 
     public TaskRowAdapter(MainActivity mainActivity, List<Map<String, Object>> mylist) {
-        super(mainActivity, mylist, R.layout.row, new String[]{"name", "price", "formattedDueDate"}, new int[]{R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate});
+        super(mainActivity, mylist, R.layout.task_list_row, new String[]{"name", "price", "formattedDueDate"}, new int[]{R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate});
         this.mainActivity = mainActivity;
         today = Calendar.getInstance();
         today.setTime(new Date());

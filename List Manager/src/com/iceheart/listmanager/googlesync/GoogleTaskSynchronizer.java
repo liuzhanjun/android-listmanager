@@ -457,7 +457,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	@Override
 	protected void onPostExecute(Boolean result) {
 		progressDialog.dismiss();
-		taskListActivity.refreshList();
+		taskListActivity.refreshTaskList();
 		
 		if ( !result ) {
 			 AlertDialog.Builder builder = new AlertDialog.Builder(taskListActivity );

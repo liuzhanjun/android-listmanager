@@ -126,7 +126,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="40dp"
         android:onClick="save"
-        android:text="@string/save" />
+        android:text="@string/btn_save" />
 
     <Button
         android:id="@+id/button2"
@@ -136,6 +136,6 @@
         android:layout_alignBottom="@+id/button1"
         android:layout_toRightOf="@+id/button1"
         android:onClick="cancel"
-        android:text="@android:string/cancel" />
+        android:text="@string/btn_cancel" />
 
 </RelativeLayout>
