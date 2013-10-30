@@ -112,6 +112,7 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( 
 	    		"select * from task " +
 	    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
+	    		"and completed_date is null " + 
 	    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
@@ -188,6 +189,7 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( "select * from task " +
 	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
 	    								   "and tags like '%"+tagName+"%' " +
+	    								   "and completed_date is null  " +
 	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
@@ -208,6 +210,7 @@ public class TaskDatasource {
 		    		"select * from task " +
 		    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
 		    		"and due_date <= " + (System.currentTimeMillis() + (7 * 24*60*60*1000 )) + " " +
+		    		"and completed_date is null "  +
 		    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 		    cursor.moveToFirst();
@@ -220,4 +223,44 @@ public class TaskDatasource {
 		    cursor.close();
 		    return tasks; 
 		}
+
+	public List<Task> getAllCompletedTasks() {
+		 List<Task> tasks = new ArrayList<Task>();
+
+		    Cursor cursor = database.rawQuery( 
+		    		"select * from task " +
+		    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
+		    		"and completed_date is not null " + 
+		    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
+
+		    cursor.moveToFirst();
+		    while (!cursor.isAfterLast()) {
+		      Task task = cursorToTask(cursor);
+		      tasks.add(task);
+		      cursor.moveToNext();
+		    }
+		    // Make sure to close the cursor
+		    cursor.close();
+		    return tasks;	
+	}
+
+	public List<Task> findCompletedTasksByTag(String tagName) {
+		List<Task> tasks = new ArrayList<Task>();
+
+	    Cursor cursor = database.rawQuery( "select * from task " +
+	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
+	    								   "and tags like '%"+tagName+"%' " +
+	    								   "and completed_date is not null " +
+	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
+
+	    cursor.moveToFirst();
+	    while (!cursor.isAfterLast()) {
+	      Task task = cursorToTask(cursor);
+	      tasks.add(task);
+	      cursor.moveToNext();
+	    }
+	    // Make sure to close the cursor
+	    cursor.close();
+	    return tasks;
+	}
 } 
