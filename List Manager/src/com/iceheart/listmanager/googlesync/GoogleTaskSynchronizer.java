@@ -20,12 +20,12 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.iceheart.listmanager.ApplicationSettings;
 import com.iceheart.listmanager.MainActivity;
 import com.iceheart.listmanager.R;
-import com.iceheart.listmanager.tag.Tag;
-import com.iceheart.listmanager.tag.TagDatasource;
-import com.iceheart.listmanager.tag.TagStatus;
 import com.iceheart.listmanager.task.Task;
 import com.iceheart.listmanager.task.TaskDatasource;
 import com.iceheart.listmanager.task.TaskStatus;
+import com.iceheart.listmanager.tasklist.TaskList;
+import com.iceheart.listmanager.tasklist.TaskListDatasource;
+import com.iceheart.listmanager.tasklist.TaskListStatus;
 
 import java.net.URL;
 import java.util.Collection;
@@ -102,11 +102,11 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	private void synchronizeTags(Context context, long lastSynchronisation) {
         publishProgress( "Synchronizing Tags List", null, -1 );
 
-		TagDatasource ds = new TagDatasource( context );
+		TaskListDatasource ds = new TaskListDatasource( context );
 		ds.open();
-		List<Tag> localTags = ds.getAllTags();
-		Map<String, Tag> tagMap = new HashMap<String,Tag>();
-		for ( Tag localTag: localTags ) {
+		List<TaskList> localTags = ds.getAllTags();
+		Map<String, TaskList> tagMap = new HashMap<String,TaskList>();
+		for ( TaskList localTag: localTags ) {
 			tagMap.put( localTag.getName(), localTag );
 		}
 
@@ -123,14 +123,14 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
             count++;
             publishProgress( null, count );
 
-			Tag googleTag = listEntryToTag( tagEntry );
+			TaskList googleTag = listEntryToTag( tagEntry );
 			
-			Tag localTag = tagMap.remove( googleTag.getName()  );
+			TaskList localTag = tagMap.remove( googleTag.getName()  );
 			
 			if ( localTag == null ) {
 				googleTag = ds.save( googleTag );
 				updateTagEntry(tagEntry, googleTag);
-			} else if ( localTag.getStatus() == TagStatus.DELETED ) {
+			} else if ( localTag.getStatus() == TaskListStatus.DELETED ) {
 				try {
 					tagEntry.delete();
 				} catch (Exception e) {
@@ -146,13 +146,13 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 			}
 		}
 
-        Collection<Tag> tagValues = tagMap.values();
+        Collection<TaskList> tagValues = tagMap.values();
         if (tagValues.size() > 0 ) {
             publishProgress( "Synchronizing Local Tag Changes", 0, tagValues.size() );
         }
 
         count = 0;
-		for ( Tag localTask: tagValues ) {
+		for ( TaskList localTask: tagValues ) {
             count++;
             publishProgress( null, count );
 
@@ -286,7 +286,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		
 	}
 	
-	private void updateTagEntry(ListEntry entry, Tag localTag) {
+	private void updateTagEntry(ListEntry entry, TaskList localTag) {
 		entry.getCustomElements().setValueLocal("name", localTag.getName() );
 		try {
 			entry.update();
@@ -314,8 +314,8 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		
 	}
 	
-	private Tag listEntryToTag( ListEntry entry ) {
-    	Tag tag = new Tag();
+	private TaskList listEntryToTag( ListEntry entry ) {
+    	TaskList tag = new TaskList();
     	tag.setName(entry.getCustomElements().getValue( "name" ));
     	return tag;
 		

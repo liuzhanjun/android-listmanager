@@ -1,8 +1,14 @@
 package com.iceheart.listmanager;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,28 +37,22 @@ import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
 
 import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
-import com.iceheart.listmanager.tag.Tag;
-import com.iceheart.listmanager.tag.TagDatasource;
-import com.iceheart.listmanager.tag.TagRowAdapter;
-import com.iceheart.listmanager.tag.TagStatus;
-import com.iceheart.listmanager.tag.TagType;
 import com.iceheart.listmanager.task.Task;
 import com.iceheart.listmanager.task.TaskDatasource;
 import com.iceheart.listmanager.task.TaskRowAdapter;
 import com.iceheart.listmanager.task.TaskStatus;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.iceheart.listmanager.tasklist.TaskList;
+import com.iceheart.listmanager.tasklist.TaskListDatasource;
+import com.iceheart.listmanager.tasklist.TaskListRowAdapter;
+import com.iceheart.listmanager.tasklist.TaskListStatus;
+import com.iceheart.listmanager.tasklist.TaskListType;
 
 public class MainActivity extends FragmentActivity  {
 	
-	public static Tag selectedTag = new Tag( TagType.SYSTEM_COMING_SOON );
+	public static TaskList selectedTag = new TaskList( TaskListType.SYSTEM_COMING_SOON );
 	private static boolean firstLoad = true;
 	private List<Task> tasks;
-	private List<Tag> tags;
+	private List<TaskList> tags;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
     private ViewPager mViewPager;
@@ -183,9 +183,9 @@ public class MainActivity extends FragmentActivity  {
 		TaskDatasource ds = new TaskDatasource( this);
         ds.open();
 
-        if ( selectedTag == null || selectedTag.getType() == TagType.SYSTEM_ALL ) {
+        if ( selectedTag == null || selectedTag.getType() == TaskListType.SYSTEM_ALL ) {
             tasks = ds.getAllActiveTasks();
-        } else if ( selectedTag.getType() == TagType.SYSTEM_COMING_SOON) {
+        } else if ( selectedTag.getType() == TaskListType.SYSTEM_COMING_SOON) {
             tasks = ds.findIncomingTask();
         } else {
             tasks = ds.findActiveTasksByTag( selectedTag.getName() );
@@ -231,29 +231,29 @@ public class MainActivity extends FragmentActivity  {
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		
-		TagDatasource ds = new TagDatasource( this );
+		TaskListDatasource ds = new TaskListDatasource( this );
         ds.open();
         tags = ds.getAllActiveTags();
         
         /*
          * For each tag, get the number of task
          */
-        for ( Tag tag: tags ) {
+        for ( TaskList tag: tags ) {
         	ds.calculateActiveTaskCount(tag);
         }       
         ds.close();
         
         List<Map<String, Object>> tags = new ArrayList<Map<String, Object>>();
         
-        tags.add(new Tag(TagType.SYSTEM_ALL).toMap());
-        tags.add(new Tag(TagType.SYSTEM_COMING_SOON).toMap());
-        for ( Tag tag: this.tags) {
+        tags.add(new TaskList(TaskListType.SYSTEM_ALL).toMap());
+        tags.add(new TaskList(TaskListType.SYSTEM_COMING_SOON).toMap());
+        for ( TaskList tag: this.tags) {
             tags.add(tag.toMap());
         }
-        tags.add(new Tag(TagType.SYSTEM_NEW_TAG).toMap());
+        tags.add(new TaskList(TaskListType.SYSTEM_NEW_LIST).toMap());
         
         final ListView tagListView = (ListView) findViewById(R.id.tagsList);
-        tagListView.setAdapter(new TagRowAdapter(this, tags));
+        tagListView.setAdapter(new TaskListRowAdapter(this, tags));
         
         
         tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {
@@ -263,23 +263,23 @@ public class MainActivity extends FragmentActivity  {
 				
   	  			 final Map<String,Object> selectedTag = (Map<String,Object>)tagListView.getItemAtPosition( itemPos );
   	  			 
-  	  			 Tag tag = (Tag) selectedTag.get( "tag" );
-  	  			 if ( tag.getType() != TagType.USER_DEFINED ) {
+  	  			 TaskList tag = (TaskList) selectedTag.get( "list" );
+  	  			 if ( tag.getType() != TaskListType.USER_DEFINED ) {
   	  				 return false;
   	  			 }
   	  			 
 
 				 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-           	  	 builder.setTitle(R.string.delete_tag);
-           	  	 builder.setMessage( R.string.delete_tag_confirmation );
+           	  	 builder.setTitle(R.string.delete_list);
+           	  	 builder.setMessage( R.string.delete_list_confirmation );
            	  	 builder.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
            	      
            	  		 @Override
            	  		 public void onClick(DialogInterface dialog, int which) {
-           	  			 TagDatasource ds = new TagDatasource( MainActivity.this );
+           	  			 TaskListDatasource ds = new TaskListDatasource( MainActivity.this );
            	  			 ds.open();
-           	  			 Tag tagToDelete = ds.getTagByName( (String)selectedTag.get("name") );
-           	  			 tagToDelete.setStatus( TagStatus.DELETED );
+           	  			 TaskList tagToDelete = ds.getTagByName( (String)selectedTag.get("name") );
+           	  			 tagToDelete.setStatus( TaskListStatus.DELETED );
            	  			 ds.save( tagToDelete );
            	  			 ds.close();
            	  			 refreshTagList();
@@ -306,12 +306,12 @@ public class MainActivity extends FragmentActivity  {
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
               Map<String,Object> selectedTagObj = (Map<String,Object>) (tagListView.getItemAtPosition(myItemInt));
-              selectedTag = (Tag) selectedTagObj.get("tag");
+              selectedTag = (TaskList) selectedTagObj.get("list");
               
               
-              if ( selectedTag.getType() == TagType.SYSTEM_NEW_TAG ) {
+              if ( selectedTag.getType() == TaskListType.SYSTEM_NEW_LIST ) {
             	  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            	  builder.setTitle(R.string.add_Tag);
+            	  builder.setTitle(R.string.add_list);
 
             	  // Set up the input
             	  final EditText input = new EditText(MainActivity.this);
@@ -322,9 +322,9 @@ public class MainActivity extends FragmentActivity  {
             	  builder.setPositiveButton(getString(R.string.btn_ok), new DialogInterface.OnClickListener() {
             	      @Override
             	      public void onClick(DialogInterface dialog, int which) {
-            	  		TagDatasource ds = new TagDatasource( MainActivity.this );
+            	  		TaskListDatasource ds = new TaskListDatasource( MainActivity.this );
             	        ds.open();
-            	        Tag tag = new Tag( input.getText().toString() );
+            	        TaskList tag = new TaskList( input.getText().toString() );
             	        ds.save( tag );
             	        ds.close();
             	        refreshTagList();
@@ -479,9 +479,9 @@ public class MainActivity extends FragmentActivity  {
 		
 	}
 
-    public Tag getUserDefinedTagWithName( String name) {
-        for( Tag tag : tags ) {
-            if (tag.getType() == TagType.USER_DEFINED && tag.getName().equalsIgnoreCase( name ) ) {
+    public TaskList getUserDefinedTagWithName( String name) {
+        for( TaskList tag : tags ) {
+            if (tag.getType() == TaskListType.USER_DEFINED && tag.getName().equalsIgnoreCase( name ) ) {
                 Log.d("getUserDefinedTagWithName", "found tag with name:" + name );
                 return tag;
             }
@@ -494,18 +494,18 @@ public class MainActivity extends FragmentActivity  {
     // and NOT a FragmentPagerAdapter.
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter {
         private final MainActivity mainActivity;
-        private Tag tag;
-        private List<Task> tasksForTag;
-        private List<Task> incompleteTasksForTag;
-        private List<Task> completedTasksForTag;
+        private TaskList taskList;
+        private List<Task> incomingTaskForList;
+        private List<Task> incompleteTasksForList;
+        private List<Task> completedTasksForList;
 
 
-        public CollectionPagerAdapter(MainActivity mainActivity, Tag tag, List<Task> allTasksForTag, FragmentManager fm) {
+        public CollectionPagerAdapter(MainActivity mainActivity, TaskList taskList, List<Task> allTasksForList, FragmentManager fm) {
             super(fm);
 
             this.mainActivity = mainActivity;
-            this.tag = tag;
-            setTaskList(allTasksForTag);
+            this.taskList = taskList;
+            setTaskList(allTasksForList);
         }
 
         @Override
@@ -514,13 +514,13 @@ public class MainActivity extends FragmentActivity  {
             switch( position ) {
                 default:
                 case 0:
-                    fragment.setArgObject(tasksForTag);
+                    fragment.setArgObject(incomingTaskForList);
                     break;
                 case 1:
-                    fragment.setArgObject(incompleteTasksForTag);
+                    fragment.setArgObject(incompleteTasksForList);
                     break;
                 case 2:
-                    fragment.setArgObject(completedTasksForTag);
+                    fragment.setArgObject(completedTasksForList);
                     break;
             }
             return fragment;
@@ -536,26 +536,27 @@ public class MainActivity extends FragmentActivity  {
             switch( position ) {
                 default:
                 case 0:
-                    return mainActivity.getString(R.string.tab_all, tag.getName());
+                    return mainActivity.getString(R.string.tab_incoming, taskList.getName());
                 case 1:
-                    return mainActivity.getString(R.string.tab_active, tag.getName());
+                    return mainActivity.getString(R.string.tab_all, taskList.getName());
                 case 2:
-                    return mainActivity.getString(R.string.tab_completed, tag.getName());
+                    return mainActivity.getString(R.string.tab_completed, taskList.getName());
             }
         }
 
         private void setTaskList( List<Task> tasks ) {
-            this.tasksForTag = tasks;
-
-            // Create filtered lists active (incompleteTasksForTag)
-            // Create filtered lists completedTasksForTag
-            this.incompleteTasksForTag = new ArrayList<Task>();
-            this.completedTasksForTag = new ArrayList<Task>();
+            this.incompleteTasksForList = new ArrayList<Task>();
+            this.completedTasksForList = new ArrayList<Task>();
+            this.incomingTaskForList = new ArrayList<Task>();
+            
             for( Task task : tasks ) {
                 if ( !task.isCompleted() ) {
-                    incompleteTasksForTag.add(task);
+                    incompleteTasksForList.add(task);
+                    if ( task.isComingSoon() ) {
+                    	incomingTaskForList.add( task );
+                    }
                 } else {
-                    completedTasksForTag.add(task);
+                    completedTasksForList.add(task);
                 }
             }
 
@@ -564,10 +565,12 @@ public class MainActivity extends FragmentActivity  {
 
     // Instances of this class are fragments representing a single
     // object in our collection.
-    public static class ListFragment extends Fragment {
+    @SuppressLint("ValidFragment")
+	public static class ListFragment extends Fragment {
         private final MainActivity mainActivity;
         private List<Task> tasks;
-
+        
+        
         public ListFragment(MainActivity mainActivity) {
             this.mainActivity = mainActivity;
         }

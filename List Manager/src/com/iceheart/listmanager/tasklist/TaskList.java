@@ -1,4 +1,4 @@
-package com.iceheart.listmanager.tag;
+package com.iceheart.listmanager.tasklist;
 
 import com.iceheart.listmanager.R;
 
@@ -6,13 +6,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Tag {
+public class TaskList {
 	
 	private String name;
 	
 	private Date lastSynchroDate;	
 	
-	private TagStatus status = TagStatus.ACTIVE;
+	private TaskListStatus status = TaskListStatus.ACTIVE;
 	
 	/**
 	 * Transient field for the AddTask screen.
@@ -20,17 +20,17 @@ public class Tag {
 	private boolean selected = false;
 	
 	/**
-	 * Tansient field to store the number of task for this tag.
+	 * Tansient field to store the number of task for this list.
 	 */
 	private int taskCount = 0;
     private int iconId = -1;
-    private TagType type = TagType.USER_DEFINED;
-    private int tagColor = android.R.color.transparent;
+    private TaskListType type = TaskListType.USER_DEFINED;
+    private int listColor = android.R.color.transparent;
 
     /**
      * Constructor to build a System predefined list.
      */
-    public Tag( TagType type ) {
+    public TaskList( TaskListType type ) {
     	this.type = type;
     	
     	switch ( type ) {
@@ -44,9 +44,9 @@ public class Tag {
     			this.name = "Coming Soon";
                 iconId = R.drawable.ic_coming_soon;
                 break;
-    		case  SYSTEM_NEW_TAG:
+    		case  SYSTEM_NEW_LIST:
     			// TODO Resource label
-    			this.name = "New Tag";
+    			this.name = "New List";
                 iconId = R.drawable.ic_tag_add;
                 break;
                 
@@ -61,24 +61,24 @@ public class Tag {
      * Constructor to build a user-defined list.
      * @param name
      */
-    public Tag( String name ) {
+    public TaskList( String name ) {
 		this.name = name;
-		this.type = TagType.USER_DEFINED;
+		this.type = TaskListType.USER_DEFINED;
         this.iconId = R.drawable.ic_tag_add;
-        this.tagColor = generateColorId(name);
+        this.listColor = generateColorId(name);
     }
 	
-	public Tag() {
-        this.type = TagType.USER_DEFINED;
+	public TaskList() {
+        this.type = TaskListType.USER_DEFINED;
         this.iconId = R.drawable.ic_tag;
-        this.tagColor = android.R.color.transparent;
+        this.listColor = android.R.color.transparent;
 	}
 
-    public Tag(String name, int iconId ) {
+    public TaskList(String name, int iconId ) {
         this.name = name;
         this.iconId = iconId;
 
-        this.tagColor = generateColorId(name);
+        this.listColor = generateColorId(name);
     }
 
     public String getName() {
@@ -88,7 +88,7 @@ public class Tag {
 	public void setName(String name) {
 
         this.name = name;
-        this.tagColor = generateColorId(name);
+        this.listColor = generateColorId(name);
 	}
 
 	public boolean isSelected() {
@@ -117,10 +117,10 @@ public class Tag {
 	
 	@Override
 	public boolean equals(Object o) {
-		if ( !( o instanceof Tag )  ) {
+		if ( !( o instanceof TaskList )  ) {
 			return false;
 		}
-		Tag tag = (Tag) o;
+		TaskList tag = (TaskList) o;
 		return tag.getName().equals( this.getName() );
 		
 	}
@@ -130,19 +130,19 @@ public class Tag {
 		map.put( "name", name);
 		if ( getTaskCount() > 0 ) {
 			map.put( "taskCount", String.valueOf( getTaskCount() ));
-		} else if ( getType() == TagType.USER_DEFINED ) {
+		} else if ( getType() == TaskListType.USER_DEFINED ) {
             map.put( "taskCount", String.valueOf( 0 ));
         }
 		
-		map.put( "tag", this );
+		map.put( "list", this );
 		return map;
 	}
 
-	public TagStatus getStatus() {
+	public TaskListStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(TagStatus status) {
+	public void setStatus(TaskListStatus status) {
 		this.status = status;
 	}
 
@@ -154,16 +154,16 @@ public class Tag {
         this.iconId = resourceId;
     }
 
-	public TagType getType() {
+	public TaskListType getType() {
 		return type;
 	}
 
-	public void setType(TagType type) {
+	public void setType(TaskListType type) {
 		this.type = type;
 	}
 
     public int getTagColor() {
-        return tagColor;
+        return listColor;
     }
 
     private int generateColorId(String name) {

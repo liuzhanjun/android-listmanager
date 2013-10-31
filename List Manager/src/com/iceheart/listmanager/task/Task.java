@@ -284,7 +284,17 @@ public class Task implements Serializable {
 	}
 
     public boolean isCompleted() {
-        // TODO calculate this
-        return false;
+    	return completedDate != null;
     }
+    
+	public boolean isComingSoon() {
+		if ( isCompleted() ) {
+			return false;
+		}
+		
+		long today = System.currentTimeMillis();
+		long dueDateTime = dueDate.getTime();
+		long diff = dueDateTime - today;
+		return diff < 7 * 24 * 60 * 60 * 1000;
+	}
 }

@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.iceheart.listmanager.MainActivity;
 import com.iceheart.listmanager.R;
-import com.iceheart.listmanager.tag.Tag;
+import com.iceheart.listmanager.tasklist.TaskList;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -123,7 +123,7 @@ public class TaskRowAdapter extends SimpleAdapter {
             // Fetch the tag color
             GradientDrawable back = (GradientDrawable) convertView.getBackground();
 
-            Tag tag = mainActivity.getUserDefinedTagWithName(this.getItem(position));
+            TaskList tag = mainActivity.getUserDefinedTagWithName(this.getItem(position));
             if ( tag != null ) {
                 back.setColor(mainActivity.getResources().getColor(tag.getTagColor()));
             } else {

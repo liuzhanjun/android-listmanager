@@ -1,4 +1,4 @@
-package com.iceheart.listmanager.tag;
+package com.iceheart.listmanager.tasklist;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,12 +13,12 @@ import android.database.sqlite.SQLiteDatabase;
 import com.iceheart.listmanager.task.TaskSQLHelper;
 import com.iceheart.listmanager.task.TaskStatus;
 
-public class TagDatasource {
+public class TaskListDatasource {
 
   private SQLiteDatabase database;
   private TaskSQLHelper dbHelper;
 
-  public TagDatasource(Context context) {
+  public TaskListDatasource(Context context) {
     dbHelper = new TaskSQLHelper(context);
   }
 
@@ -30,7 +30,7 @@ public class TagDatasource {
     dbHelper.close();
   }
 
-  public Tag save( Tag tag ) {
+  public TaskList save( TaskList tag ) {
     ContentValues values = new ContentValues();
     values.put(  "name", tag.getName() );
     values.put(  "status", tag.getStatus().name() );
@@ -40,7 +40,7 @@ public class TagDatasource {
     }
     values.put( "last_synchro_date", tag.getLastSynchroDate().getTime() );
     
-    Tag  persistedTag = getTagByName( tag.getName() );
+    TaskList  persistedTag = getTagByName( tag.getName() );
     if ( persistedTag == null ) {
         database.insert(TaskSQLHelper.TABLE_TAG, null, values );
     } else {
@@ -50,18 +50,18 @@ public class TagDatasource {
     
   }
 
-  public void delete(Tag tag) {
+  public void delete(TaskList tag) {
 	    database.delete( TaskSQLHelper.TABLE_TAG,  "name = '" + tag.getName() + "'", null );
   }
 
-  public List<Tag> getAllTags() {
-    List<Tag> tags = new ArrayList<Tag>();
+  public List<TaskList> getAllTags() {
+    List<TaskList> tags = new ArrayList<TaskList>();
 
     Cursor cursor = database.rawQuery( "select * from tag", null);
 
     cursor.moveToFirst();
     while (!cursor.isAfterLast()) {
-      Tag tag = cursorToTag(cursor);
+      TaskList tag = cursorToTag(cursor);
       tags.add(tag);
       cursor.moveToNext();
     }
@@ -71,14 +71,14 @@ public class TagDatasource {
     return tags;
   }
   
-  public List<Tag> getAllActiveTags() {
-	    List<Tag> tags = new ArrayList<Tag>();
+  public List<TaskList> getAllActiveTags() {
+	    List<TaskList> tags = new ArrayList<TaskList>();
 
-	    Cursor cursor = database.rawQuery( "select * from tag where status = '"+ TagStatus.ACTIVE+"'", null);
+	    Cursor cursor = database.rawQuery( "select * from tag where status = '"+ TaskListStatus.ACTIVE+"'", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
-	      Tag tag = cursorToTag(cursor);
+	      TaskList tag = cursorToTag(cursor);
 	      tags.add(tag);
 	      cursor.moveToNext();
 	    }
@@ -89,8 +89,8 @@ public class TagDatasource {
 	  }
   
   
-  private Tag cursorToTag(Cursor cursor) {
-    Tag tag = new Tag();
+  private TaskList cursorToTag(Cursor cursor) {
+    TaskList tag = new TaskList();
     tag.setName(cursor.getString(0));
 
     Long lastSynchroDate = cursor.getLong( 1 );
@@ -98,17 +98,17 @@ public class TagDatasource {
         tag.setLastSynchroDate( new Date( lastSynchroDate));
     }
     
-    tag.setStatus(TagStatus.valueOf(cursor.getString(2) ));
+    tag.setStatus(TaskListStatus.valueOf(cursor.getString(2) ));
     
     
     return tag;
   }
 
 
-	public Tag getTagByName(String name ) {
+	public TaskList getTagByName(String name ) {
 	    Cursor cursor = database.rawQuery( "select * from tag where name = '" + name + "'", null);
 	    
-	    Tag tag = null;
+	    TaskList tag = null;
 	    if ( cursor.getCount() > 0 ) {
 		    cursor.moveToFirst();
 		    tag = cursorToTag(cursor);
@@ -118,7 +118,7 @@ public class TagDatasource {
 	    return tag;
 	}
 
-	public void calculateActiveTaskCount(Tag tag) {
+	public void calculateActiveTaskCount(TaskList tag) {
 	    Cursor cursor = database.rawQuery( 
 	    		"select count(*) " +
 	    		"from task " +

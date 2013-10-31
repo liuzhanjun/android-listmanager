@@ -19,16 +19,16 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
-import com.iceheart.listmanager.tag.Tag;
-import com.iceheart.listmanager.tag.TagDatasource;
-import com.iceheart.listmanager.tag.TagType;
 import com.iceheart.listmanager.task.Task;
 import com.iceheart.listmanager.task.TaskDatasource;
+import com.iceheart.listmanager.tasklist.TaskList;
+import com.iceheart.listmanager.tasklist.TaskListDatasource;
+import com.iceheart.listmanager.tasklist.TaskListType;
 
 public class AddTaskActivity extends Activity {
 	
 	private Task task;
-	private List<Tag> tags;
+	private List<TaskList> tags;
 	private EditText tagsEditText;
 	
 	@Override
@@ -44,7 +44,7 @@ public class AddTaskActivity extends Activity {
 			/*
 			 * If the task list was displaying a specific tag. Default this with this tag.
 			 */
-			if ( MainActivity.selectedTag != null && MainActivity.selectedTag.getType() == TagType.USER_DEFINED ) {
+			if ( MainActivity.selectedTag != null && MainActivity.selectedTag.getType() == TaskListType.USER_DEFINED ) {
 				task.setTags( MainActivity.selectedTag.getName() );
 			}
 		}
@@ -65,14 +65,14 @@ public class AddTaskActivity extends Activity {
 		tagsEditText = (EditText) findViewById(R.id.editTags);
 		tagsEditText.setText( task.getTagsAsString() == null ? "":  task.getTagsAsString() );
 		
-		tags = new ArrayList<Tag>();
+		tags = new ArrayList<TaskList>();
 		
-		 TagDatasource ds = new TagDatasource( this );
+		 TaskListDatasource ds = new TaskListDatasource( this );
 	     ds.open();
 	     tags = ds.getAllActiveTags();
 	     ds.close();
 		
-		for ( Tag tag: tags ) {
+		for ( TaskList tag: tags ) {
 			if ( task.getTags().contains( tag.getName() ) ) {
 				tag.setSelected( true );
 			}
@@ -87,7 +87,7 @@ public class AddTaskActivity extends Activity {
 		final String[] items = new String[ tags.size() ];
 		final boolean[] checked = new boolean[ tags.size() ];
 		int i = 0;
-		for ( Tag tag: tags ) {
+		for ( TaskList tag: tags ) {
 			items[ i ] = tag.getName();
 			checked[ i ] = tag.isSelected();
 			i++;
@@ -99,7 +99,7 @@ public class AddTaskActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 				tags.get( which ).setSelected( isChecked );
 				String text = "";
-				for ( Tag tag: tags ) {
+				for ( TaskList tag: tags ) {
 					if ( tag.isSelected() ) {
 						if ( !text.isEmpty() ) {
 							text += ",";
@@ -191,7 +191,7 @@ public class AddTaskActivity extends Activity {
 		if ( tagList == null || tagList.isEmpty() ) {
 			 AlertDialog.Builder builder = new AlertDialog.Builder(this);
        	  	 builder.setTitle(R.string.validation_failed);
-       	  	 builder.setMessage( R.string.tags_must_be_specified );
+       	  	 builder.setMessage( R.string.lists_must_be_specified );
        	  	 builder.setCancelable(true);
        	  	 builder.show();
 			return false;

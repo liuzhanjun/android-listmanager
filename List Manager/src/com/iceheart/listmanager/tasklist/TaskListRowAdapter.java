@@ -1,4 +1,4 @@
-package com.iceheart.listmanager.tag;
+package com.iceheart.listmanager.tasklist;
 
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
@@ -16,11 +16,11 @@ import java.util.Map;
 /**
 * Created by nmasse on 10/22/13.
 */
-public class TagRowAdapter extends SimpleAdapter {
+public class TaskListRowAdapter extends SimpleAdapter {
 
     private MainActivity mainActivity;
 
-    public TagRowAdapter(MainActivity mainActivity, List<Map<String, Object>> mylist) {
+    public TaskListRowAdapter(MainActivity mainActivity, List<Map<String, Object>> mylist) {
         super(mainActivity, mylist, R.layout.tag_row, new String[]{"name", "taskCount"}, new int[]{R.id.rowTagName, R.id.rowTagTaskCount});
         this.mainActivity = mainActivity;
     }
@@ -32,7 +32,7 @@ public class TagRowAdapter extends SimpleAdapter {
         ImageView iconView = (ImageView) view.findViewById(R.id.rowTagIcon);
         TextView tagCountView = (TextView) view.findViewById(R.id.rowTagTaskCount);
 
-        Tag tag = (Tag) ((Map<String, Object>)this.getItem(position)).get("tag");
+        TaskList tag = (TaskList) ((Map<String, Object>)this.getItem(position)).get("list");
 
         if ( tag != null ) {
             int resourceId = tag.getIconId();
