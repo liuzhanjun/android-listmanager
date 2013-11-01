@@ -288,7 +288,7 @@ public class Task implements Serializable {
     }
     
 	public boolean isComingSoon() {
-		if ( isCompleted() ) {
+		if ( isCompleted() || dueDate == null ) {
 			return false;
 		}
 		

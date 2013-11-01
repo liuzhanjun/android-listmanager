@@ -39,11 +39,6 @@ public class TaskList {
     			this.name = "ALL";
     		    iconId =  R.drawable.ic_tag_all;
     			break;
-    		case  SYSTEM_COMING_SOON:
-    			// TODO Resource label
-    			this.name = "Coming Soon";
-                iconId = R.drawable.ic_coming_soon;
-                break;
     		case  SYSTEM_NEW_LIST:
     			// TODO Resource label
     			this.name = "New List";

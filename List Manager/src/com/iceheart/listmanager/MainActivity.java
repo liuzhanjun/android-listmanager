@@ -49,7 +49,7 @@ import com.iceheart.listmanager.tasklist.TaskListType;
 
 public class MainActivity extends FragmentActivity  {
 	
-	public static TaskList selectedTag = new TaskList( TaskListType.SYSTEM_COMING_SOON );
+	public static TaskList selectedTag = new TaskList( TaskListType.SYSTEM_ALL );
 	private static boolean firstLoad = true;
 	private List<Task> tasks;
 	private List<TaskList> tags;
@@ -185,8 +185,6 @@ public class MainActivity extends FragmentActivity  {
 
         if ( selectedTag == null || selectedTag.getType() == TaskListType.SYSTEM_ALL ) {
             tasks = ds.getAllActiveTasks();
-        } else if ( selectedTag.getType() == TaskListType.SYSTEM_COMING_SOON) {
-            tasks = ds.findIncomingTask();
         } else {
             tasks = ds.findActiveTasksByTag( selectedTag.getName() );
         }
@@ -246,7 +244,6 @@ public class MainActivity extends FragmentActivity  {
         List<Map<String, Object>> tags = new ArrayList<Map<String, Object>>();
         
         tags.add(new TaskList(TaskListType.SYSTEM_ALL).toMap());
-        tags.add(new TaskList(TaskListType.SYSTEM_COMING_SOON).toMap());
         for ( TaskList tag: this.tags) {
             tags.add(tag.toMap());
         }
@@ -258,6 +255,7 @@ public class MainActivity extends FragmentActivity  {
         
         tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, final int itemPos, long lng) {
 				
@@ -569,6 +567,7 @@ public class MainActivity extends FragmentActivity  {
 	public static class ListFragment extends Fragment {
         private final MainActivity mainActivity;
         private List<Task> tasks;
+        
         
         
         public ListFragment(MainActivity mainActivity) {
