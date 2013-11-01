@@ -25,7 +25,8 @@ public class TaskListRowAdapter extends SimpleAdapter {
         this.mainActivity = mainActivity;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
 

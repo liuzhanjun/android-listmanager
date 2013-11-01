@@ -42,13 +42,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MasterListActivity" />
         </activity>
-        <activity
-            android:name="com.iceheart.listmanager.CompletedTaskActivity"
-            android:label="@string/title_activity_completed_task">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.iceheart.listmanager.MainActivity" />
-        </activity>
     </application>
 
 </manifest>

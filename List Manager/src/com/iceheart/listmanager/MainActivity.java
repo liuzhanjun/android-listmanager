@@ -367,13 +367,6 @@ public class MainActivity extends FragmentActivity  {
 		startActivity(intent);
 	}
 	
-	public void openCompletedTasks( MenuItem view ) {
-		Intent intent = new Intent(this, CompletedTaskActivity.class);
-		startActivity(intent);
-	}
-	
-	
-	
 	public void openAddTask( MenuItem item ) {
 		Intent intent = new Intent(this, AddTaskActivity.class);
 		startActivity( intent );

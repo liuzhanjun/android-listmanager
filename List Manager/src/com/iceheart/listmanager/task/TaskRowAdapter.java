@@ -1,5 +1,6 @@
 package com.iceheart.listmanager.task;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,7 +43,9 @@ public class TaskRowAdapter extends SimpleAdapter {
         today.set(Calendar.MILLISECOND, 0);
     }
 
-    @Override
+    @SuppressLint("SimpleDateFormat")
+	@SuppressWarnings("unchecked")
+	@Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
 
