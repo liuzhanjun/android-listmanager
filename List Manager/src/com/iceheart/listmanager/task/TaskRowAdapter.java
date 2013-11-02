@@ -118,12 +118,10 @@ public class TaskRowAdapter extends SimpleAdapter {
             }
 
             int count = this.getCount();
-            int height = 30 / count;
-//            convertView.setMaxHeight( height );
+            int height = parent.getHeight() / Math.min(count, 5);
             convertView.setMinimumHeight( height );
             convertView.setMinimumWidth( 5 );
 
-            Log.d("tagsImageView.setAdapter.getView", "getCount=" + count + ", position=" + position);
             // Fetch the tag color
             GradientDrawable back = (GradientDrawable) convertView.getBackground();
 
