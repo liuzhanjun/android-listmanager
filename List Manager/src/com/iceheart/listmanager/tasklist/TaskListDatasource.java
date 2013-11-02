@@ -30,104 +30,109 @@ public class TaskListDatasource {
     dbHelper.close();
   }
 
-  public TaskList save( TaskList tag ) {
+  public TaskList save( TaskList taskList ) {
     ContentValues values = new ContentValues();
-    values.put(  "name", tag.getName() );
-    values.put(  "status", tag.getStatus().name() );
-    
-    if ( tag.getLastSynchroDate() == null ) {
-    	tag.setLastSynchroDate(new Date());
+    if ( taskList.getId() == null ) {
+    	taskList.setId( TaskListCache.getInstance().getNextId() );
     }
-    values.put( "last_synchro_date", tag.getLastSynchroDate().getTime() );
+    values.put(  "id", taskList.getId() );
+    values.put(  "name", taskList.getName() );
+    values.put(  "status", taskList.getStatus().name() );
     
-    TaskList  persistedTag = getTagByName( tag.getName() );
-    if ( persistedTag == null ) {
-        database.insert(TaskSQLHelper.TABLE_TAG, null, values );
+    if ( taskList.getLastSynchroDate() == null ) {
+    	taskList.setLastSynchroDate(new Date());
+    }
+    values.put( "last_synchro_date", taskList.getLastSynchroDate().getTime() );
+    
+    TaskList  persistedEntry = getById( taskList.getId() );
+    if ( persistedEntry == null ) {
+        database.insert(TaskSQLHelper.TABLE_TASK_LIST, null, values );
     } else {
-    	database.update( "tag", values, "name = '" + tag.getName() + "'", null );
+    	database.update( "task_list", values, "id = " + taskList.getId() + "", null );
     }
-    return tag;
+    return taskList;
     
   }
 
-  public void delete(TaskList tag) {
-	    database.delete( TaskSQLHelper.TABLE_TAG,  "name = '" + tag.getName() + "'", null );
+  public void delete(TaskList taskList) {
+	    database.delete( TaskSQLHelper.TABLE_TASK_LIST,  "id = " + taskList.getId() , null );
   }
 
-  public List<TaskList> getAllTags() {
-    List<TaskList> tags = new ArrayList<TaskList>();
+  public List<TaskList> getAll() {
+    List<TaskList> lists = new ArrayList<TaskList>();
 
-    Cursor cursor = database.rawQuery( "select * from tag", null);
+    Cursor cursor = database.rawQuery( "select * from task_list", null);
 
     cursor.moveToFirst();
     while (!cursor.isAfterLast()) {
-      TaskList tag = cursorToTag(cursor);
-      tags.add(tag);
+      TaskList taskList = cursorToTaskList(cursor);
+      lists.add(taskList);
       cursor.moveToNext();
     }
     
     // Make sure to close the cursor
     cursor.close();
-    return tags;
+    return lists;
   }
   
-  public List<TaskList> getAllActiveTags() {
-	    List<TaskList> tags = new ArrayList<TaskList>();
+  public List<TaskList> getAllActive() {
+	    List<TaskList> lists = new ArrayList<TaskList>();
 
-	    Cursor cursor = database.rawQuery( "select * from tag where status = '"+ TaskListStatus.ACTIVE+"'", null);
+	    Cursor cursor = database.rawQuery( "select * from task_list where status = '"+ TaskListStatus.ACTIVE+"'", null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
-	      TaskList tag = cursorToTag(cursor);
-	      tags.add(tag);
+	      TaskList list = cursorToTaskList(cursor);
+	      lists.add(list);
 	      cursor.moveToNext();
 	    }
 	    
 	    // Make sure to close the cursor
 	    cursor.close();
-	    return tags;
+	    return lists;
 	  }
   
   
-  private TaskList cursorToTag(Cursor cursor) {
-    TaskList tag = new TaskList();
-    tag.setName(cursor.getString(0));
+  private TaskList cursorToTaskList(Cursor cursor) {
+    TaskList list = new TaskList();
+    list.setId(cursor.getLong(0));
+    list.setName(cursor.getString(1));
 
-    Long lastSynchroDate = cursor.getLong( 1 );
+    Long lastSynchroDate = cursor.getLong( 2 );
     if ( lastSynchroDate != null && lastSynchroDate != 0 ) {
-        tag.setLastSynchroDate( new Date( lastSynchroDate));
+        list.setLastSynchroDate( new Date( lastSynchroDate));
     }
     
-    tag.setStatus(TaskListStatus.valueOf(cursor.getString(2) ));
+    list.setStatus(TaskListStatus.valueOf(cursor.getString(3) ));
     
     
-    return tag;
+    return list;
   }
 
 
-	public TaskList getTagByName(String name ) {
-	    Cursor cursor = database.rawQuery( "select * from tag where name = '" + name + "'", null);
+	public TaskList getById( Long id ) {
+	    Cursor cursor = database.rawQuery( "select * from task_list where id = " + id + "", null);
 	    
-	    TaskList tag = null;
+	    TaskList list = null;
 	    if ( cursor.getCount() > 0 ) {
 		    cursor.moveToFirst();
-		    tag = cursorToTag(cursor);
+		    list = cursorToTaskList(cursor);
 	    }
 	    // Make sure to close the cursor
 	    cursor.close();
-	    return tag;
+	    return list;
 	}
 
-	public void calculateActiveTaskCount(TaskList tag) {
+	public void calculateActiveTaskCount(TaskList list) {
 	    Cursor cursor = database.rawQuery( 
 	    		"select count(*) " +
 	    		"from task " +
-	    		"where tags like '%" + tag.getName() + "%' " +
+	    		"where list_id = " + list.getId() + " " +
 	    		"and completed_date is null " +
 	    		"and status != '"  + TaskStatus.DELETED + "'", null);
 	    cursor.moveToFirst();
 	    int taskCount = cursor.getInt( 0 );
-	    tag.setTaskCount( taskCount );
+	    list.setTaskCount( taskCount );
 	    cursor.close();
 	}
 } 

@@ -8,16 +8,14 @@ import java.util.Map;
 
 public class TaskList {
 	
+	private Long id;
+	
 	private String name;
 	
 	private Date lastSynchroDate;	
 	
 	private TaskListStatus status = TaskListStatus.ACTIVE;
 	
-	/**
-	 * Transient field for the AddTask screen.
-	 */
-	private boolean selected = false;
 	
 	/**
 	 * Tansient field to store the number of task for this list.
@@ -84,14 +82,6 @@ public class TaskList {
 
         this.name = name;
         this.listColor = generateColorId(name);
-	}
-
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
-		this.selected = selected;
 	}
 
 	public Date getLastSynchroDate() {
@@ -167,7 +157,15 @@ public class TaskList {
         return colors[ c.hashCode() % colors.length];
     }
 
-    private static int[] colors = new int [] {
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	private static int[] colors = new int [] {
             android.R.color.holo_orange_dark,
             android.R.color.holo_orange_light,
             android.R.color.holo_blue_dark,

@@ -42,6 +42,7 @@ import com.iceheart.listmanager.task.TaskDatasource;
 import com.iceheart.listmanager.task.TaskRowAdapter;
 import com.iceheart.listmanager.task.TaskStatus;
 import com.iceheart.listmanager.tasklist.TaskList;
+import com.iceheart.listmanager.tasklist.TaskListCache;
 import com.iceheart.listmanager.tasklist.TaskListDatasource;
 import com.iceheart.listmanager.tasklist.TaskListRowAdapter;
 import com.iceheart.listmanager.tasklist.TaskListStatus;
@@ -49,14 +50,14 @@ import com.iceheart.listmanager.tasklist.TaskListType;
 
 public class MainActivity extends FragmentActivity  {
 	
-	public static TaskList selectedTag = new TaskList( TaskListType.SYSTEM_ALL );
+	public static TaskList selectedList = new TaskList( TaskListType.SYSTEM_ALL );
 	private static boolean firstLoad = true;
 	private List<Task> tasks;
-	private List<TaskList> tags;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
     private ViewPager mViewPager;
 //    private ActionBar.Tab allTasksTab;
+    private TaskListCache taskListsCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,9 +138,7 @@ public class MainActivity extends FragmentActivity  {
 			return;
 		}
 
-        // Refresh task List
         refreshTaskList();
-        // Refresh Tag List
 		refreshTagList();
 
         /*
@@ -183,15 +182,15 @@ public class MainActivity extends FragmentActivity  {
 		TaskDatasource ds = new TaskDatasource( this);
         ds.open();
 
-        if ( selectedTag == null || selectedTag.getType() == TaskListType.SYSTEM_ALL ) {
+        if ( selectedList == null || selectedList.getType() == TaskListType.SYSTEM_ALL ) {
             tasks = ds.getAllActiveTasks();
         } else {
-            tasks = ds.findActiveTasksByTag( selectedTag.getName() );
+            tasks = ds.findActiveTasksForList( selectedList.getId() );
         }
         ds.close();
 
         
-        String title = selectedTag.getName();
+        String title = selectedList.getName();
         if ( tasks.size() > 0 ) {
         	
             title += " (" + tasks.size();
@@ -212,7 +211,7 @@ public class MainActivity extends FragmentActivity  {
         setShareContent( tasks );
 
         // Create a new set of pages for the tabs based on the new allTasksForTag list
-        CollectionPagerAdapter pagerAdapter = new CollectionPagerAdapter(this, selectedTag, tasks, getSupportFragmentManager());
+        CollectionPagerAdapter pagerAdapter = new CollectionPagerAdapter(this, selectedList, tasks, getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
 
         // Set the actionBar item to the correct selected tab
@@ -228,23 +227,29 @@ public class MainActivity extends FragmentActivity  {
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-		
-		TaskListDatasource ds = new TaskListDatasource( this );
+
+        if ( taskListsCache == null ) {
+            taskListsCache = TaskListCache.getInstance( this );
+        } else {
+            taskListsCache.refreshCache();
+        }
+        
+        TaskListDatasource ds = new TaskListDatasource( this );
         ds.open();
-        tags = ds.getAllActiveTags();
         
         /*
-         * For each tag, get the number of task
+         * For each list, get the number of task
+         * TODO: MOve in the TaskListCache.. ?
          */
-        for ( TaskList tag: tags ) {
-        	ds.calculateActiveTaskCount(tag);
+        for ( TaskList taskList: taskListsCache.getTaskLists() ) {
+        	ds.calculateActiveTaskCount(taskList);
         }       
         ds.close();
         
         List<Map<String, Object>> tags = new ArrayList<Map<String, Object>>();
         
         tags.add(new TaskList(TaskListType.SYSTEM_ALL).toMap());
-        for ( TaskList tag: this.tags) {
+        for ( TaskList tag: this.taskListsCache.getTaskLists()) {
             tags.add(tag.toMap());
         }
         tags.add(new TaskList(TaskListType.SYSTEM_NEW_LIST).toMap());
@@ -261,7 +266,7 @@ public class MainActivity extends FragmentActivity  {
 				
   	  			 final Map<String,Object> selectedTag = (Map<String,Object>)tagListView.getItemAtPosition( itemPos );
   	  			 
-  	  			 TaskList tag = (TaskList) selectedTag.get( "list" );
+  	  			 final TaskList tag = (TaskList) selectedTag.get( "list" );
   	  			 if ( tag.getType() != TaskListType.USER_DEFINED ) {
   	  				 return false;
   	  			 }
@@ -276,9 +281,8 @@ public class MainActivity extends FragmentActivity  {
            	  		 public void onClick(DialogInterface dialog, int which) {
            	  			 TaskListDatasource ds = new TaskListDatasource( MainActivity.this );
            	  			 ds.open();
-           	  			 TaskList tagToDelete = ds.getTagByName( (String)selectedTag.get("name") );
-           	  			 tagToDelete.setStatus( TaskListStatus.DELETED );
-           	  			 ds.save( tagToDelete );
+           	  			 tag.setStatus( TaskListStatus.DELETED );
+           	  			 ds.save( tag );
            	  			 ds.close();
            	  			 refreshTagList();
            	  		 }
@@ -304,10 +308,10 @@ public class MainActivity extends FragmentActivity  {
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
               Map<String,Object> selectedTagObj = (Map<String,Object>) (tagListView.getItemAtPosition(myItemInt));
-              selectedTag = (TaskList) selectedTagObj.get("list");
+              selectedList = (TaskList) selectedTagObj.get("list");
               
               
-              if ( selectedTag.getType() == TaskListType.SYSTEM_NEW_LIST ) {
+              if ( selectedList.getType() == TaskListType.SYSTEM_NEW_LIST ) {
             	  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             	  builder.setTitle(R.string.add_list);
 
@@ -449,8 +453,8 @@ public class MainActivity extends FragmentActivity  {
 		
 		StringBuffer buffer = new StringBuffer();
 		
-		if ( selectedTag != null ) {
-			buffer.append( selectedTag.getName() + " (" + selectedTag.getTaskCount() + getString(R.string.suffix_items) + ")" );
+		if ( selectedList != null ) {
+			buffer.append( selectedList.getName() + " (" + selectedList.getTaskCount() + getString(R.string.suffix_items) + ")" );
 		} else {
 			buffer.append( getString(R.string.title_allTasks));
 		}
@@ -471,7 +475,7 @@ public class MainActivity extends FragmentActivity  {
 	}
 
     public TaskList getUserDefinedTagWithName( String name) {
-        for( TaskList tag : tags ) {
+        for( TaskList tag : taskListsCache.getTaskLists() ) {
             if (tag.getType() == TaskListType.USER_DEFINED && tag.getName().equalsIgnoreCase( name ) ) {
                 Log.d("getUserDefinedTagWithName", "found tag with name:" + name );
                 return tag;

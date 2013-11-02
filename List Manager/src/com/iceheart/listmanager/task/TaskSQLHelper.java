@@ -15,11 +15,11 @@ import android.util.Log;
 public class TaskSQLHelper extends SQLiteOpenHelper {
 	
 	public static final String TABLE_TASK = "task";
-	public static final String TABLE_TAG = "tag";
+	public static final String TABLE_TASK_LIST = "task_list";
 	
 
 	private static final String DATABASE_NAME = "listmanagement.db";
-	private static final int DATABASE_VERSION = 6;
+	private static final int DATABASE_VERSION = 7;
 
 	private static final String CREATE_TASK = 
 			"create table task ( " +
@@ -31,13 +31,14 @@ public class TaskSQLHelper extends SQLiteOpenHelper {
 			" estimated_price decimal(10,2), " +
 			" final_price decimal(10,2), " +
 			" notes text," +
-			" tags text," +
+			" list_id numeric," +
 			" status text," +
 			" creation_date numeric " +
 			");";
 	
-	private static final String CREATE_TAG = 
-			"create table tag ( " +
+	private static final String CREATE_TASK_LIST = 
+			"create table task_list ( " +
+	        " id integer primary key, " +
 			" name text, " +
 			" last_synchro_date numeric, " +
 			" status text " + 
@@ -53,7 +54,7 @@ public class TaskSQLHelper extends SQLiteOpenHelper {
   @Override
   public void onCreate(SQLiteDatabase database) {
     database.execSQL(CREATE_TASK);
-    database.execSQL(CREATE_TAG);
+    database.execSQL(CREATE_TASK_LIST);
   }
 
   @Override
@@ -61,6 +62,7 @@ public class TaskSQLHelper extends SQLiteOpenHelper {
     Log.w(TaskSQLHelper.class.getName(), "Upgrading database from version " + oldVersion + " to " + newVersion );
     db.execSQL("DROP TABLE IF EXISTS task"  );
     db.execSQL("DROP TABLE IF EXISTS tag"  );
+    db.execSQL("DROP TABLE IF EXISTS task_list"  );
     onCreate(db);
   }
 

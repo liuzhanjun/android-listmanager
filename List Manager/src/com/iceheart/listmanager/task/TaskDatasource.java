@@ -69,7 +69,7 @@ public class TaskDatasource {
     }
     
     values.put( "notes", task.getNotes() );
-    values.put( "tags", task.getTagsAsString() );
+    values.put( "list_id", task.getListId() );
     values.put( "status", task.getStatus().name() );
     
     if ( task.getId() == null ) {
@@ -158,7 +158,7 @@ public class TaskDatasource {
     	
     }
     task.setNotes(cursor.getString( 7 ));
-    task.setTags( cursor.getString( 8 ) );
+    task.setListId( cursor.getLong( 8 ) );
     task.setStatus( TaskStatus.valueOf( cursor.getString( 9 ) ));
 
     Long creationDate = cursor.getLong( 10 );
@@ -183,12 +183,12 @@ public class TaskDatasource {
 	    return task;
 	}
 
-	public List<Task> findActiveTasksByTag(String tagName) {
+	public List<Task> findActiveTasksForList(Long listId ) {
 	    List<Task> tasks = new ArrayList<Task>();
 
 	    Cursor cursor = database.rawQuery( "select * from task " +
 	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
-	    								   "and tags like '%"+tagName+"%' " +
+	    								   "and list_id = "+ listId + " " +
 	    								   "and completed_date is null  " +
 	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
@@ -244,23 +244,4 @@ public class TaskDatasource {
 		    return tasks;	
 	}
 
-	public List<Task> findCompletedTasksByTag(String tagName) {
-		List<Task> tasks = new ArrayList<Task>();
-
-	    Cursor cursor = database.rawQuery( "select * from task " +
-	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
-	    								   "and tags like '%"+tagName+"%' " +
-	    								   "and completed_date is not null " +
-	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
-
-	    cursor.moveToFirst();
-	    while (!cursor.isAfterLast()) {
-	      Task task = cursorToTask(cursor);
-	      tasks.add(task);
-	      cursor.moveToNext();
-	    }
-	    // Make sure to close the cursor
-	    cursor.close();
-	    return tasks;
-	}
 } 

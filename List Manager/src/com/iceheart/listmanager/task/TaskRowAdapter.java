@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.iceheart.listmanager.MainActivity;
 import com.iceheart.listmanager.R;
 import com.iceheart.listmanager.tasklist.TaskList;
+import com.iceheart.listmanager.tasklist.TaskListCache;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -84,28 +85,28 @@ public class TaskRowAdapter extends SimpleAdapter {
         }
 
         Task task = (Task)entry.get("task");
-        List<String> tags = task.getTags();
+        Long taskListId = task.getListId();
         ListView tagsListView = (ListView) view.findViewById(R.id.tagColorView);
-        if ( tags.size() > 0 ) {
+        if ( taskListId != null ) {
             if ( tagsListView != null ) {
-                Log.d("tagsImageView,setAdapter", "number of rows in the tagslist:" + tags.size());
-                ArrayList<String> tags2 = new ArrayList<String>();
-                tags2.addAll(tags);
-
-                tagsListView.setAdapter(new TagColorViewAdapter(tags2));
+            	// TODO: To revise (simplify since no more multiple task list.
+            	List<TaskList> taskLists = new ArrayList<TaskList>();
+            	taskLists.add( TaskListCache.getInstance().getById(taskListId));
+                //Log.d("tagsImageView,setAdapter", "number of rows in the tagslist:" + tags.size());
+                tagsListView.setAdapter(new TagColorViewAdapter(taskLists));
                 Log.d("tagsImageView,setAdapter", "width=" + tagsListView.getWidth());
                 Log.d("tagsImageView,setAdapter", "height=" + tagsListView.getHeight() );
             }
         } else {
-            Log.d("tagsImageView,setAdapter", "transparent:" + tags.size());
+            //Log.d("tagsImageView,setAdapter", "transparent"  );
             tagsListView.setBackgroundResource(android.R.color.transparent);
         }
 
         return view;
     }
 
-    private class TagColorViewAdapter extends ArrayAdapter<String> {
-        public TagColorViewAdapter(List<String> tags) {
+    private class TagColorViewAdapter extends ArrayAdapter<TaskList> {
+        public TagColorViewAdapter(List<TaskList> tags) {
             super(TaskRowAdapter.this.mainActivity, R.layout.row_color, tags);
         }
 
@@ -126,9 +127,9 @@ public class TaskRowAdapter extends SimpleAdapter {
             // Fetch the tag color
             GradientDrawable back = (GradientDrawable) convertView.getBackground();
 
-            TaskList tag = mainActivity.getUserDefinedTagWithName(this.getItem(position));
-            if ( tag != null ) {
-                back.setColor(mainActivity.getResources().getColor(tag.getTagColor()));
+            TaskList list = this.getItem(position);
+            if ( this.getItem(position) != null ) {
+                back.setColor(mainActivity.getResources().getColor(list.getTagColor()));
             } else {
                 back.setColor(mainActivity.getResources().getColor(android.R.color.transparent));
             }

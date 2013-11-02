@@ -24,6 +24,7 @@ import com.iceheart.listmanager.task.Task;
 import com.iceheart.listmanager.task.TaskDatasource;
 import com.iceheart.listmanager.task.TaskStatus;
 import com.iceheart.listmanager.tasklist.TaskList;
+import com.iceheart.listmanager.tasklist.TaskListCache;
 import com.iceheart.listmanager.tasklist.TaskListDatasource;
 import com.iceheart.listmanager.tasklist.TaskListStatus;
 
@@ -71,8 +72,9 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		
 		try {
 		
-			synchronizeTaskList(context, lastSynchronisation);
-			synchronizeTags( context, lastSynchronisation );
+			synchronizeTaskLists( context, lastSynchronisation );
+			TaskListCache.getInstance( taskListActivity ).refreshCache();
+			synchronizeTasks(context, lastSynchronisation);
 		} catch ( Exception e ) {
 			lastException = e.getMessage();
 			return false;
@@ -99,23 +101,23 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	    return false;
 	}	
 
-	private void synchronizeTags(Context context, long lastSynchronisation) {
-        publishProgress( "Synchronizing Tags List", null, -1 );
+	private void synchronizeTaskLists(Context context, long lastSynchronisation) {
+        publishProgress( "Synchronizing Tasks List", null, -1 );
 
 		TaskListDatasource ds = new TaskListDatasource( context );
 		ds.open();
-		List<TaskList> localTags = ds.getAllTags();
+		List<TaskList> localLists = ds.getAll();
 		Map<String, TaskList> tagMap = new HashMap<String,TaskList>();
-		for ( TaskList localTag: localTags ) {
+		for ( TaskList localTag: localLists ) {
 			tagMap.put( localTag.getName(), localTag );
 		}
 
-        publishProgress("Reading tags from Google Drive");
+        publishProgress("Reading task lists from Google Drive");
 
 		ListFeed tagsFromGoogle = readTagsGoogleSpreadsheet(context);
         List<ListEntry> googleEntries = tagsFromGoogle.getEntries();
         if ( googleEntries.size() > 0 ) {
-            publishProgress( "Processing Google Spreadsheet Tags", 0, googleEntries.size() );
+            publishProgress( "Processing Google Spreadsheet Task lists", 0, googleEntries.size() );
         }
 
         int count = 0;
@@ -123,7 +125,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
             count++;
             publishProgress( null, count );
 
-			TaskList googleTag = listEntryToTag( tagEntry );
+			TaskList googleTag = listEntryToTaskList( tagEntry );
 			
 			TaskList localTag = tagMap.remove( googleTag.getName()  );
 			
@@ -134,7 +136,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 				try {
 					tagEntry.delete();
 				} catch (Exception e) {
-					throw new RuntimeException( "Unable to delete task: " + tagEntry.getId() + " (" + e.getMessage() + ")" );
+					throw new RuntimeException( "Unable to delete task list: " + tagEntry.getId() + " (" + e.getMessage() + ")" );
 				}
 				ds.delete( localTag );
 			} else if ( localTag.getLastSynchroDate() == null || localTag.getLastSynchroDate().getTime() <= lastSynchronisation ) {
@@ -148,7 +150,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 
         Collection<TaskList> tagValues = tagMap.values();
         if (tagValues.size() > 0 ) {
-            publishProgress( "Synchronizing Local Tag Changes", 0, tagValues.size() );
+            publishProgress( "Synchronizing Local Task List Changes", 0, tagValues.size() );
         }
 
         count = 0;
@@ -182,7 +184,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	 * @param context The context. (Activity)
 	 * @param lastSynchronisation The last synchronization timestamp.
 	 */
-	private void synchronizeTaskList(Context context, long lastSynchronisation) {
+	private void synchronizeTasks(Context context, long lastSynchronisation) {
         publishProgress( "Synchronizing Task List", null, -1 );
 
 		TaskDatasource ds = new TaskDatasource( context);
@@ -277,7 +279,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		entry.getCustomElements().setValueLocal("estimatedprice", localTask.getEstimatedPrice() == null ? "": localTask.getEstimatedPrice().toPlainString() );
 		entry.getCustomElements().setValueLocal("notes", localTask.getNotes() == null ? "": localTask.getNotes() );
 		entry.getCustomElements().setValueLocal("reaprice", localTask.getRealPrice() == null ? "": localTask.getRealPrice().toPlainString() );
-		entry.getCustomElements().setValueLocal("tags", localTask.getTagsAsString() );
+		entry.getCustomElements().setValueLocal("tags", TaskListCache.getInstance().getById( localTask.getListId() ).getName() );
 		entry.getCustomElements().setValueLocal("id", String.valueOf( localTask.getId() ) );
 		try {
 			entry.update();
@@ -304,7 +306,12 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		task.setEstimatedPrice( entry.getCustomElements().getValue( "estimatedprice") );
 		task.setNotes(entry.getCustomElements().getValue( "notes") );
 		task.setRealPrice( entry.getCustomElements().getValue( "realPrice")  );
-    	task.setTags( entry.getCustomElements().getValue( "tags" ));
+		String listName = entry.getCustomElements().getValue( "tags" );
+		if ( listName != null && !listName.isEmpty() ) {
+			TaskList list = TaskListCache.getInstance().getByName( listName );
+	    	task.setListId( list.getId() );
+		}
+				
     	String taskId = entry.getCustomElements().getValue( "id" );
     	if ( taskId != null && !taskId.isEmpty() ) {
         	task.setId( Long.parseLong( taskId ) );
@@ -314,11 +321,10 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		
 	}
 	
-	private TaskList listEntryToTag( ListEntry entry ) {
-    	TaskList tag = new TaskList();
-    	tag.setName(entry.getCustomElements().getValue( "name" ));
-    	return tag;
-		
+	private TaskList listEntryToTaskList( ListEntry entry ) {
+    	TaskList list = new TaskList();
+    	list.setName(entry.getCustomElements().getValue( "name" ));
+    	return list;
 	}
 	
 	

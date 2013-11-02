@@ -3,11 +3,8 @@ package com.iceheart.listmanager.task;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -30,7 +27,7 @@ public class Task implements Serializable {
 	private Date lastSynchroDate;
 	private BigDecimal estimatedPrice;
 	private BigDecimal realPrice;
-	private List<String> tags = new ArrayList<String>();
+	private Long listId = null;
 	private TaskStatus status = TaskStatus.ACTIVE;
 	
 	public String getName() {
@@ -73,11 +70,11 @@ public class Task implements Serializable {
 	public void setRealPrice(BigDecimal realPrice) {
 		this.realPrice = realPrice;
 	}
-	public List<String> getTags() {
-		return tags;
+	public Long getListId() {
+		return listId;
 	}
-	public void setTags(List<String> tags) {
-		this.tags = tags;
+	public void setListId(Long listId) {
+		this.listId = listId;
 	}
 	public Map<String, Object> toMap() {
 		Map<String,Object> map = new HashMap<String,Object>();
@@ -124,30 +121,6 @@ public class Task implements Serializable {
 		 
 	}
 
-	public String getTagsAsString() {
-		StringBuilder builder = new StringBuilder();
-		if ( getTags() != null ) {
-			for (  String tag: getTags() ) {
-				if ( builder.length() > 0 ) {
-					builder.append( "," );
-				}
-				builder.append( tag );
-			}
-		}
-		return builder.toString();
-		
-	}
-	
-	public void setTags(String value) {
-		if ( value == null ) {
-			tags = new ArrayList<String>();
-		} else {
-			String[] values = value.split( ",");
-			tags = Arrays.asList( values );
-			
-		}
-		
-	}
 	public Long getId() {
 		return id;
 	}
@@ -176,7 +149,7 @@ public class Task implements Serializable {
 			return false;
 		}
 
-		if ( !compareFields( taskToCompare.getTagsAsString(), getTagsAsString() ) ) {
+		if ( !compareFields( taskToCompare.getListId(), getListId() ) ) {
 			return false;
 		}
 
@@ -225,9 +198,11 @@ public class Task implements Serializable {
 	public TaskStatus getStatus() {
 		return status;
 	}
+	
 	public void setStatus(TaskStatus status) {
 		this.status = status;
 	}
+	
 	public void setDueDate(String value) {
 		try {
 			setDueDate( DATE_FORMAT.parse( value ) ); 

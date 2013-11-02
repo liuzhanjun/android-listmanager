@@ -1,10 +1,8 @@
 package com.iceheart.listmanager;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -22,13 +20,13 @@ import android.widget.EditText;
 import com.iceheart.listmanager.task.Task;
 import com.iceheart.listmanager.task.TaskDatasource;
 import com.iceheart.listmanager.tasklist.TaskList;
-import com.iceheart.listmanager.tasklist.TaskListDatasource;
+import com.iceheart.listmanager.tasklist.TaskListCache;
 import com.iceheart.listmanager.tasklist.TaskListType;
 
 public class AddTaskActivity extends Activity {
 	
 	private Task task;
-	private List<TaskList> tags;
+	private TaskList selectedList;
 	private EditText tagsEditText;
 	
 	@Override
@@ -42,10 +40,10 @@ public class AddTaskActivity extends Activity {
 			task = new Task();
 			
 			/*
-			 * If the task list was displaying a specific tag. Default this with this tag.
+			 * If the task list was displaying a specific task list. Default this with this list.
 			 */
-			if ( MainActivity.selectedTag != null && MainActivity.selectedTag.getType() == TaskListType.USER_DEFINED ) {
-				task.setTags( MainActivity.selectedTag.getName() );
+			if ( MainActivity.selectedList != null && MainActivity.selectedList.getType() == TaskListType.USER_DEFINED ) {
+				task.setListId( MainActivity.selectedList.getId() );
 			}
 		}
 		
@@ -63,20 +61,8 @@ public class AddTaskActivity extends Activity {
 		notes.setText( task.getNotes() == null ? "":  task.getNotes() );
 		
 		tagsEditText = (EditText) findViewById(R.id.editTags);
-		tagsEditText.setText( task.getTagsAsString() == null ? "":  task.getTagsAsString() );
-		
-		tags = new ArrayList<TaskList>();
-		
-		 TaskListDatasource ds = new TaskListDatasource( this );
-	     ds.open();
-	     tags = ds.getAllActiveTags();
-	     ds.close();
-		
-		for ( TaskList tag: tags ) {
-			if ( task.getTags().contains( tag.getName() ) ) {
-				tag.setSelected( true );
-			}
-		}
+		selectedList = TaskListCache.getInstance().getById(( task.getListId() ) );
+		tagsEditText.setText( selectedList == null ? "":  selectedList.getName() );
 
 	}
 	
@@ -84,12 +70,12 @@ public class AddTaskActivity extends Activity {
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder( this );
 		builder.setCancelable(true);
-		final String[] items = new String[ tags.size() ];
-		final boolean[] checked = new boolean[ tags.size() ];
+		final String[] items = new String[ TaskListCache.getInstance().getTaskLists().size() ];
+		final boolean[] checked = new boolean[ TaskListCache.getInstance().getTaskLists().size() ];
 		int i = 0;
-		for ( TaskList tag: tags ) {
-			items[ i ] = tag.getName();
-			checked[ i ] = tag.isSelected();
+		for ( TaskList tList: TaskListCache.getInstance().getTaskLists() ) {
+			items[ i ] = tList.getName();
+			checked[ i ] = tList == selectedList;
 			i++;
 		}
 		
@@ -97,21 +83,13 @@ public class AddTaskActivity extends Activity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-				tags.get( which ).setSelected( isChecked );
-				String text = "";
-				for ( TaskList tag: tags ) {
-					if ( tag.isSelected() ) {
-						if ( !text.isEmpty() ) {
-							text += ",";
-						}
-						text += tag.getName();
-					}
-				}
-				tagsEditText.setText( text );
+				selectedList = TaskListCache.getInstance().getTaskLists().get( which );
+				tagsEditText.setText( selectedList.getName() );
 				
 			}
 		};
 		
+		// TOOD: CHange for a single choice item.
 		builder.setMultiChoiceItems(items, checked, listener);
 		AlertDialog dialog = builder.create();
 		dialog.show();
@@ -152,8 +130,7 @@ public class AddTaskActivity extends Activity {
 		EditText notes = (EditText) findViewById(R.id.editNotes);
 		task.setNotes(notes.getText().toString() );
 
-		EditText tags = (EditText) findViewById(R.id.editTags);
-		task.setTags( tags.getText().toString() );
+		task.setListId(  selectedList.getId() );
 		
 		task.setLastSynchroDate( new Date() );
 
@@ -186,9 +163,7 @@ public class AddTaskActivity extends Activity {
 		/*
 		 * Make sure the user have entered a tag.
 		 */
-		EditText tags = (EditText) findViewById(R.id.editTags);
-		String tagList = tags.getText().toString();
-		if ( tagList == null || tagList.isEmpty() ) {
+		if ( selectedList == null ) {
 			 AlertDialog.Builder builder = new AlertDialog.Builder(this);
        	  	 builder.setTitle(R.string.validation_failed);
        	  	 builder.setMessage( R.string.lists_must_be_specified );
