@@ -193,7 +193,7 @@ public class MainActivity extends FragmentActivity  {
         String title = selectedList.getName();
         if ( tasks.size() > 0 ) {
         	
-            title += " (" + tasks.size();
+            title += " (" + tasks.size() + " ";
             title += tasks.size() > 1? getString(R.string.suffix_items):getString(R.string.suffix_item);
             BigDecimal totalPrice = new BigDecimal( 0 );
             for ( Task task: tasks ) {

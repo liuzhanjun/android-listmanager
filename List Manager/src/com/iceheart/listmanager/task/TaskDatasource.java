@@ -112,7 +112,6 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( 
 	    		"select * from task " +
 	    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
-	    		"and completed_date is null " + 
 	    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
@@ -189,7 +188,6 @@ public class TaskDatasource {
 	    Cursor cursor = database.rawQuery( "select * from task " +
 	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
 	    								   "and list_id = "+ listId + " " +
-	    								   "and completed_date is null  " +
 	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
 
 	    cursor.moveToFirst();
