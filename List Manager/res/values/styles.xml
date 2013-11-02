@@ -47,4 +47,6 @@
 
     <color name="drawerDivider">#ccc</color>
     <color name="drawerBackground">#dfdfdf</color>
+    <color name="pagerBackground">#333</color>
+    <color name="pagerText">#dfdfdf</color>
 </resources>

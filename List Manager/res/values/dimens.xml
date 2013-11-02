@@ -4,7 +4,7 @@
     <dimen name="activity_horizontal_margin">5dp</dimen>
     <dimen name="activity_vertical_margin">5dp</dimen>
 
-    <dimen name="row_divider_height">2dp</dimen>
+    <dimen name="row_divider_height">3dp</dimen>
     <dimen name="row_height">32dip</dimen>
     <dimen name="row_img_width">32dp</dimen>
     <dimen name="row_img_height">28dp</dimen>
@@ -18,4 +18,8 @@
     <dimen name="drawer_divider_height">1dp</dimen>
     <dimen name="drawer_row_height">36dip</dimen>
     <dimen name="drawer_row_img">24dp</dimen>
+    <dimen name="task_list_padding">5dp</dimen>
+    <dimen name="pager_title_strip_padding_h">5dp</dimen>
+    <dimen name="pager_title_strip_padding_v">10dp</dimen>
+
 </resources>

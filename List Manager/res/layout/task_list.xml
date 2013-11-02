@@ -6,5 +6,6 @@
     android:layout_alignParentLeft="true"
     android:layout_alignParentRight="true"
     android:layout_alignParentTop="true"
+    android:padding="@dimen/task_list_padding"
     android:divider="@android:color/transparent"
-    android:dividerHeight="@dimen/drawer_divider_height"/>
+    android:dividerHeight="@dimen/row_divider_height"/>
