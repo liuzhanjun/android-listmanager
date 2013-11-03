@@ -9,7 +9,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -70,27 +70,30 @@ public class AddTaskActivity extends Activity {
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder( this );
 		builder.setCancelable(true);
+		
 		final String[] items = new String[ TaskListCache.getInstance().getTaskLists().size() ];
-		final boolean[] checked = new boolean[ TaskListCache.getInstance().getTaskLists().size() ];
+		
+		int selectedIndex = -1;
 		int i = 0;
-		for ( TaskList tList: TaskListCache.getInstance().getTaskLists() ) {
-			items[ i ] = tList.getName();
-			checked[ i ] = tList == selectedList;
+		for ( TaskList taskList: TaskListCache.getInstance().getTaskLists() ) {
+			items[ i ] = taskList.getName();
+			if ( taskList == selectedList ) {
+				selectedIndex = i; 
+			}
 			i++;
 		}
-		
-		OnMultiChoiceClickListener listener = new OnMultiChoiceClickListener() {
+
+		OnClickListener listener = new OnClickListener() {
 			
 			@Override
-			public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+			public void onClick(DialogInterface dialog, int which ) {
 				selectedList = TaskListCache.getInstance().getTaskLists().get( which );
 				tagsEditText.setText( selectedList.getName() );
-				
+				dialog.dismiss();
 			}
 		};
 		
-		// TOOD: CHange for a single choice item.
-		builder.setMultiChoiceItems(items, checked, listener);
+		builder.setSingleChoiceItems(items, selectedIndex, listener );
 		AlertDialog dialog = builder.create();
 		dialog.show();
    			 
@@ -206,10 +209,6 @@ public class AddTaskActivity extends Activity {
 		dueDate.setText( "" );
 	}
 	
-	
-
-	
-
 	
 
 }
