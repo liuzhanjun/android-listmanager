@@ -56,7 +56,6 @@ public class MainActivity extends FragmentActivity  {
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
     private ViewPager mViewPager;
-//    private ActionBar.Tab allTasksTab;
     private TaskListCache taskListsCache;
 
     @Override
@@ -77,60 +76,9 @@ public class MainActivity extends FragmentActivity  {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
-/*
-            // Specify that tabs should be displayed in the action bar.
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-            // Create a tab listener that is called when the user changes tabs.
-            ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-                @Override
-                public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-                    // When the tab is selected, switch to the
-                    // corresponding page in the ViewPager.
-                    mViewPager.setCurrentItem(tab.getPosition());
-                }
-
-                @Override
-                public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-                }
-
-                @Override
-                public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-                }
-            };
-
-            // Add 3 tabs, specifying the tab's text and TabListener
-            allTasksTab = actionBar.newTab();
-            allTasksTab.setText(getString(R.string.tab_all, selectedTag.getName()));
-            allTasksTab.setTabListener(tabListener);
-            actionBar.addTab(allTasksTab);
-
-            ActionBar.Tab activeTasksTab = actionBar.newTab();
-            activeTasksTab.setText(getString(R.string.tab_active, selectedTag.getName()));
-            activeTasksTab.setTabListener(tabListener);
-            actionBar.addTab(activeTasksTab);
-
-            ActionBar.Tab completedTasksTab = actionBar.newTab();
-            completedTasksTab.setText(getString(R.string.tab_completed, selectedTag.getName()));
-            completedTasksTab.setTabListener(tabListener);
-            actionBar.addTab(completedTasksTab);
-*/
         }
 
 
-        // Create a swipe listener to change the tab selected on swipe
-/*
-        mViewPager.setOnPageChangeListener(
-            new ViewPager.SimpleOnPageChangeListener() {
-                @Override
-                public void onPageSelected(int position) {
-                    // When swiping between pages, select the
-                    // corresponding tab.
-                    getActionBar().setSelectedNavigationItem(position);
-                }
-            });
-*/
         SharedPreferences sharedPreferences = getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
 		String googleAccount = sharedPreferences.getString( ApplicationSettings.GOOGLE_ACCOUNT, "" );
 		if ( googleAccount.isEmpty() ) {
@@ -138,8 +86,8 @@ public class MainActivity extends FragmentActivity  {
 			return;
 		}
 
-        refreshTaskList();
-		refreshTagList();
+        refreshTasks();
+		refreshTaskList();
 
         /*
          * Google Synchronization on startup (If settings says so)
@@ -178,7 +126,7 @@ public class MainActivity extends FragmentActivity  {
          synchronizer.execute( this );
     }
     
-	public void refreshTaskList() {
+	public void refreshTasks() {
 		TaskDatasource ds = new TaskDatasource( this);
         ds.open();
 
@@ -210,18 +158,13 @@ public class MainActivity extends FragmentActivity  {
         setTitle( title );
         setShareContent( tasks );
 
-        // Create a new set of pages for the tabs based on the new allTasksForTag list
+        // Create a new set of pages for the tabs based on the new allTasksForTaskList
         CollectionPagerAdapter pagerAdapter = new CollectionPagerAdapter(this, selectedList, tasks, getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
 
-        // Set the actionBar item to the correct selected tab
-/*
-        allTasksTab.setText( selectedTag.getName() );
-        getActionBar().selectTab(allTasksTab);
-*/
 	}
 	
-	public void refreshTagList() {
+	public void refreshTaskList() {
 		
         final DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -246,28 +189,28 @@ public class MainActivity extends FragmentActivity  {
         }       
         ds.close();
         
-        List<Map<String, Object>> tags = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> taskLists = new ArrayList<Map<String, Object>>();
         
-        tags.add(new TaskList(TaskListType.SYSTEM_ALL).toMap());
-        for ( TaskList tag: this.taskListsCache.getTaskLists()) {
-            tags.add(tag.toMap());
+        taskLists.add(new TaskList(TaskListType.SYSTEM_ALL).toMap());
+        for ( TaskList taskList: this.taskListsCache.getTaskLists()) {
+            taskLists.add(taskList.toMap());
         }
-        tags.add(new TaskList(TaskListType.SYSTEM_NEW_LIST).toMap());
+        taskLists.add(new TaskList(TaskListType.SYSTEM_NEW_LIST).toMap());
         
-        final ListView tagListView = (ListView) findViewById(R.id.tagsList);
-        tagListView.setAdapter(new TaskListRowAdapter(this, tags));
+        final ListView taskListListView = (ListView) findViewById(R.id.taskListListView);
+        taskListListView.setAdapter(new TaskListRowAdapter(this, taskLists));
         
         
-        tagListView.setOnItemLongClickListener( new OnItemLongClickListener() {
+        taskListListView.setOnItemLongClickListener( new OnItemLongClickListener() {
 
 			@SuppressWarnings("unchecked")
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, final int itemPos, long lng) {
 				
-  	  			 final Map<String,Object> selectedTag = (Map<String,Object>)tagListView.getItemAtPosition( itemPos );
+  	  			 final Map<String,Object> selectedTaskList = (Map<String,Object>)taskListListView.getItemAtPosition( itemPos );
   	  			 
-  	  			 final TaskList tag = (TaskList) selectedTag.get( "list" );
-  	  			 if ( tag.getType() != TaskListType.USER_DEFINED ) {
+  	  			 final TaskList tl = (TaskList) selectedTaskList.get( "list" );
+  	  			 if ( tl.getType() != TaskListType.USER_DEFINED ) {
   	  				 return false;
   	  			 }
   	  			 
@@ -281,10 +224,10 @@ public class MainActivity extends FragmentActivity  {
            	  		 public void onClick(DialogInterface dialog, int which) {
            	  			 TaskListDatasource ds = new TaskListDatasource( MainActivity.this );
            	  			 ds.open();
-           	  			 tag.setStatus( TaskListStatus.DELETED );
-           	  			 ds.save( tag );
+           	  			 tl.setStatus( TaskListStatus.DELETED );
+           	  			 ds.save( tl );
            	  			 ds.close();
-           	  			 refreshTagList();
+           	  			 refreshTaskList();
            	  		 }
            	  	 });
            	  	 
@@ -303,12 +246,12 @@ public class MainActivity extends FragmentActivity  {
         });
         
         
-        tagListView.setOnItemClickListener(new OnItemClickListener() {
+        taskListListView.setOnItemClickListener(new OnItemClickListener() {
         	
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
               @SuppressWarnings("unchecked")
-              Map<String,Object> selectedTagObj = (Map<String,Object>) (tagListView.getItemAtPosition(myItemInt));
-              selectedList = (TaskList) selectedTagObj.get("list");
+              Map<String,Object> selectedListObj = (Map<String,Object>) (taskListListView.getItemAtPosition(myItemInt));
+              selectedList = (TaskList) selectedListObj.get("list");
               
               
               if ( selectedList.getType() == TaskListType.SYSTEM_NEW_LIST ) {
@@ -326,10 +269,10 @@ public class MainActivity extends FragmentActivity  {
             	      public void onClick(DialogInterface dialog, int which) {
             	  		TaskListDatasource ds = new TaskListDatasource( MainActivity.this );
             	        ds.open();
-            	        TaskList tag = new TaskList( input.getText().toString() );
-            	        ds.save( tag );
+            	        TaskList tlist = new TaskList( input.getText().toString() );
+            	        ds.save( tlist );
             	        ds.close();
-            	        refreshTagList();
+            	        refreshTaskList();
             	      }
             	  });
             	  builder.setNegativeButton(getString(R.string.btn_cancel), new DialogInterface.OnClickListener() {
@@ -341,7 +284,7 @@ public class MainActivity extends FragmentActivity  {
 
             	  builder.show();
               } else {
-                  refreshTaskList();
+                  refreshTasks();
                   mDrawerLayout.closeDrawers();
               }
               
@@ -394,7 +337,7 @@ public class MainActivity extends FragmentActivity  {
             			 ds.open();
             			 ds.save( task );
             		     ds.close();
-           	   		     refreshTaskList();
+           	   		     refreshTasks();
             		     
                     }
     			}
@@ -409,7 +352,7 @@ public class MainActivity extends FragmentActivity  {
 	   			 ds.open();
 	   			 ds.save( task );
 	   		     ds.close();         
-   	   		     refreshTaskList();
+   	   		     refreshTasks();
 
     		}
 		}
@@ -474,14 +417,14 @@ public class MainActivity extends FragmentActivity  {
 		
 	}
 
-    public TaskList getUserDefinedTagWithName( String name) {
-        for( TaskList tag : taskListsCache.getTaskLists() ) {
-            if (tag.getType() == TaskListType.USER_DEFINED && tag.getName().equalsIgnoreCase( name ) ) {
-                Log.d("getUserDefinedTagWithName", "found tag with name:" + name );
-                return tag;
+    public TaskList getUserDefinedTaskListWithName( String name) {
+        for( TaskList tlist : taskListsCache.getTaskLists() ) {
+            if (tlist.getType() == TaskListType.USER_DEFINED && tlist.getName().equalsIgnoreCase( name ) ) {
+                Log.d("getUserDefinedTaskListWithName", "found taskList with name:" + name );
+                return tlist;
             }
         }
-        Log.d("getUserDefinedTagWithName", "did NOT find tag with name:" + name );
+        Log.d("getUserDefinedTaskListWithName", "did NOT find taskList with name:" + name );
         return null;
     }
 
@@ -594,7 +537,7 @@ public class MainActivity extends FragmentActivity  {
                 });
             }
 
-            // Convert the allTasksForTag to maps for the list view
+            // Convert the allTasksForTaskList to maps for the list view
             List<Map<String, Object>> adapterList = new ArrayList<Map<String,Object>>();
             for ( Task task: tasks ) {
                 adapterList.add(task.toMap());
