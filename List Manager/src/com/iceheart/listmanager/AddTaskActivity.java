@@ -27,7 +27,7 @@ public class AddTaskActivity extends Activity {
 	
 	private Task task;
 	private TaskList selectedList;
-	private EditText tagsEditText;
+	private EditText tlistEditText;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +60,13 @@ public class AddTaskActivity extends Activity {
 		EditText notes = (EditText) findViewById(R.id.editNotes);
 		notes.setText( task.getNotes() == null ? "":  task.getNotes() );
 		
-		tagsEditText = (EditText) findViewById(R.id.editTags);
+		tlistEditText = (EditText) findViewById(R.id.editTags);
 		selectedList = TaskListCache.getInstance().getById(( task.getListId() ) );
-		tagsEditText.setText( selectedList == null ? "":  selectedList.getName() );
+		tlistEditText.setText( selectedList == null ? "":  selectedList.getName() );
 
 	}
 	
-	public void chooseTags( View view ) {
+	public void chooseTaskList( View view ) {
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder( this );
 		builder.setCancelable(true);
@@ -88,7 +88,7 @@ public class AddTaskActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which ) {
 				selectedList = TaskListCache.getInstance().getTaskLists().get( which );
-				tagsEditText.setText( selectedList.getName() );
+				tlistEditText.setText( selectedList.getName() );
 				dialog.dismiss();
 			}
 		};
@@ -164,7 +164,7 @@ public class AddTaskActivity extends Activity {
 		
 		
 		/*
-		 * Make sure the user have entered a tag.
+		 * Make sure the user have entered a list.
 		 */
 		if ( selectedList == null ) {
 			 AlertDialog.Builder builder = new AlertDialog.Builder(this);

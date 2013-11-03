@@ -100,7 +100,7 @@
                 android:focusableInTouchMode="false"
                 android:hint="@string/lists"
                 android:inputType="none"
-                android:onClick="chooseTags" />
+                android:onClick="chooseTaskList" />
         </LinearLayout>
         <LinearLayout
             android:orientation="horizontal"
