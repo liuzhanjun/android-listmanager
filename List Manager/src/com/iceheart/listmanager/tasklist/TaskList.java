@@ -12,6 +12,8 @@ public class TaskList {
 	
 	private String name;
 	
+	private String googleId;
+	
 	private Date lastSynchroDate;	
 	
 	private TaskListStatus status = TaskListStatus.ACTIVE;
@@ -163,6 +165,14 @@ public class TaskList {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getGoogleId() {
+		return googleId;
+	}
+
+	public void setGoogleId(String googleId) {
+		this.googleId = googleId;
 	}
 
 	private static int[] colors = new int [] {

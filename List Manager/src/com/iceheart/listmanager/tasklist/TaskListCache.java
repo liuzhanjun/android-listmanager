@@ -10,7 +10,6 @@ public class TaskListCache {
 	
 	private List<TaskList> taskLists;
 	private Context context;
-	private Long nextId = 1L;
 	
 	public static TaskListCache getInstance() {
 		if ( instance == null ) {
@@ -40,15 +39,6 @@ public class TaskListCache {
 		TaskListDatasource ds = new TaskListDatasource( context );
         ds.open();
         taskLists =  ds.getAllActive();
-        
-        long maxId = 0;
-        for ( TaskList taskList: taskLists  ) {
-        	if ( taskList.getId().longValue() > maxId ) {
-        		maxId = taskList.getId();
-        	}
-        }
-        nextId = maxId + 1;
-        
         ds.close();		
 	}
 	
@@ -69,10 +59,6 @@ public class TaskListCache {
 		}
 		return null;
 	} 
-	
-	public Long getNextId() {
-		return nextId++;
-	}
 	
 
 }

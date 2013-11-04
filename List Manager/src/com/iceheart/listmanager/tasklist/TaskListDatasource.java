@@ -32,20 +32,16 @@ public class TaskListDatasource {
 
   public TaskList save( TaskList taskList ) {
     ContentValues values = new ContentValues();
-    if ( taskList.getId() == null ) {
-    	taskList.setId( TaskListCache.getInstance().getNextId() );
-    }
-    values.put(  "id", taskList.getId() );
     values.put(  "name", taskList.getName() );
     values.put(  "status", taskList.getStatus().name() );
+    values.put(  "google_id", taskList.getGoogleId() );
     
     if ( taskList.getLastSynchroDate() == null ) {
     	taskList.setLastSynchroDate(new Date());
     }
     values.put( "last_synchro_date", taskList.getLastSynchroDate().getTime() );
     
-    TaskList  persistedEntry = getById( taskList.getId() );
-    if ( persistedEntry == null ) {
+    if ( taskList.getId() == null ) {
         database.insert(TaskSQLHelper.TABLE_TASK_LIST, null, values );
     } else {
     	database.update( "task_list", values, "id = " + taskList.getId() + "", null );
@@ -97,13 +93,14 @@ public class TaskListDatasource {
     TaskList list = new TaskList();
     list.setId(cursor.getLong(0));
     list.setName(cursor.getString(1));
+    list.setGoogleId(cursor.getString(2));
 
-    Long lastSynchroDate = cursor.getLong( 2 );
+    Long lastSynchroDate = cursor.getLong( 3 );
     if ( lastSynchroDate != null && lastSynchroDate != 0 ) {
         list.setLastSynchroDate( new Date( lastSynchroDate));
     }
     
-    list.setStatus(TaskListStatus.valueOf(cursor.getString(3) ));
+    list.setStatus(TaskListStatus.valueOf(cursor.getString(4) ));
     
     
     return list;

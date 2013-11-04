@@ -1,5 +1,12 @@
 package com.iceheart.listmanager.googlesync;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -10,13 +17,12 @@ import android.os.AsyncTask;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.PlainTextConstruct;
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
+import com.google.gdata.util.AuthenticationException;
 import com.iceheart.listmanager.ApplicationSettings;
 import com.iceheart.listmanager.MainActivity;
 import com.iceheart.listmanager.R;
@@ -27,12 +33,6 @@ import com.iceheart.listmanager.tasklist.TaskList;
 import com.iceheart.listmanager.tasklist.TaskListCache;
 import com.iceheart.listmanager.tasklist.TaskListDatasource;
 import com.iceheart.listmanager.tasklist.TaskListStatus;
-
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Class responsible to synchronize the task list with the google spreadsheet.
@@ -45,6 +45,9 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	private ProgressDialog progressDialog;
 	private MainActivity taskListActivity;
 	private String lastException;
+	private SpreadsheetService spreadsheetService;
+	private long lastSynchronisation;
+	
 
     public GoogleTaskSynchronizer( MainActivity activity ) {
 		this.taskListActivity = activity;
@@ -68,13 +71,13 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		}
 		
 		SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
-		long lastSynchronisation = sharedPreferences.getLong( ApplicationSettings.LAST_SYNCHRONIZATION, -1 );
+		lastSynchronisation = sharedPreferences.getLong( ApplicationSettings.LAST_SYNCHRONIZATION, -1 );
+		
 		
 		try {
-		
-			synchronizeTaskLists( context, lastSynchronisation );
+			synchronizeTaskLists( context );
 			TaskListCache.getInstance( taskListActivity ).refreshCache();
-			synchronizeTasks(context, lastSynchronisation);
+			synchronizeTasks(context );
 		} catch ( Exception e ) {
 			lastException = e.getMessage();
 			return false;
@@ -92,6 +95,23 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 
 	}
 	
+	private SpreadsheetService getSpreadsheetService() {
+		
+		if ( spreadsheetService == null ) {
+			SharedPreferences sharedPreferences = taskListActivity.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
+			GoogleAccountInfo googleAccountInfo = new GoogleAccountInfo( sharedPreferences );
+	        SpreadsheetService service = new SpreadsheetService("Testing");
+	       	try {
+				service.setUserCredentials(googleAccountInfo.getUsername(),  googleAccountInfo.getPassword() );
+			} catch (AuthenticationException e) {
+				throw new RuntimeException( "Unable to get the spreadshet from google",  e );
+			}
+	       	spreadsheetService = service;
+		}
+       	return spreadsheetService;
+		
+	}
+	
 	private boolean haveNetworkConnection() {
 		ConnectivityManager cm = (ConnectivityManager) taskListActivity.getSystemService(Context.CONNECTIVITY_SERVICE);
 	    for (NetworkInfo ni : cm.getAllNetworkInfo()) {
@@ -101,60 +121,60 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	    return false;
 	}	
 
-	private void synchronizeTaskLists(Context context, long lastSynchronisation) {
+	private void synchronizeTaskLists(Context context ) throws Exception {
         publishProgress( "Synchronizing Tasks List", null, -1 );
 
 		TaskListDatasource ds = new TaskListDatasource( context );
 		ds.open();
 		List<TaskList> localLists = ds.getAll();
-		Map<String, TaskList> tagMap = new HashMap<String,TaskList>();
-		for ( TaskList localTag: localLists ) {
-			tagMap.put( localTag.getName(), localTag );
+		Map<String, TaskList> taskListMap = new HashMap<String,TaskList>();
+		for ( TaskList localList: localLists ) {
+			taskListMap.put( localList.getGoogleId(), localList );
 		}
 
         publishProgress("Reading task lists from Google Drive");
 
-		ListFeed tagsFromGoogle = readTagsGoogleSpreadsheet(context);
-        List<ListEntry> googleEntries = tagsFromGoogle.getEntries();
-        if ( googleEntries.size() > 0 ) {
-            publishProgress( "Processing Google Spreadsheet Task lists", 0, googleEntries.size() );
-        }
+        SpreadsheetEntry spreadsheet = openSpreadsheet( context );
+        List<WorksheetEntry> worksheets = new ArrayList<WorksheetEntry>((spreadsheet.getWorksheets() ));
+        publishProgress( "Processing Google Spreadsheet Task lists", 0, worksheets.size() );
 
-        int count = 0;
-		for ( ListEntry tagEntry: tagsFromGoogle.getEntries() ) {
-            count++;
-            publishProgress( null, count );
-
-			TaskList googleTag = listEntryToTaskList( tagEntry );
-			
-			TaskList localTag = tagMap.remove( googleTag.getName()  );
-			
-			if ( localTag == null ) {
-				googleTag = ds.save( googleTag );
-				updateTagEntry(tagEntry, googleTag);
-			} else if ( localTag.getStatus() == TaskListStatus.DELETED ) {
+        int count = 1;
+        for ( int i = worksheets.size() - 1; i >= 0; i-- ) {
+            publishProgress( null, count++ );
+        	
+        	WorksheetEntry worksheet = worksheets.get( i );
+        	TaskList localTaskList = taskListMap.remove( worksheet.getId() );
+        	if ( localTaskList == null ) {
+        		localTaskList = new TaskList( worksheet.getTitle().getPlainText() );
+        		localTaskList.setGoogleId( worksheet.getId() );
+        		localTaskList = ds.save( localTaskList );
+			} else if ( localTaskList.getStatus() == TaskListStatus.DELETED ) {
 				try {
-					tagEntry.delete();
+					worksheet.delete();
 				} catch (Exception e) {
-					throw new RuntimeException( "Unable to delete task list: " + tagEntry.getId() + " (" + e.getMessage() + ")" );
+					throw new RuntimeException( "Unable to delete tab from spreadsheet: " + worksheet.getTitle().getPlainText() + " (" + e.getMessage() + ")" );
 				}
-				ds.delete( localTag );
-			} else if ( localTag.getLastSynchroDate() == null || localTag.getLastSynchroDate().getTime() <= lastSynchronisation ) {
-				if ( !localTag.equals( googleTag ) ) {
-					googleTag = ds.save( googleTag );
+				worksheets.remove( i );
+				ds.delete( localTaskList );
+			} else if ( localTaskList.getLastSynchroDate() == null || localTaskList.getLastSynchroDate().getTime() <= lastSynchronisation ) {
+				if ( !localTaskList.getName().equals( worksheet.getTitle().getPlainText() ) ) {
+					localTaskList.setName( worksheet.getTitle().getPlainText() );
+					localTaskList = ds.save( localTaskList );
 				}
 			} else {
-				updateTagEntry(tagEntry, localTag);
+				worksheet.setTitle( new PlainTextConstruct( localTaskList.getName() ));
+				worksheet.update();
 			}
+
 		}
 
-        Collection<TaskList> tagValues = tagMap.values();
-        if (tagValues.size() > 0 ) {
-            publishProgress( "Synchronizing Local Task List Changes", 0, tagValues.size() );
+        Collection<TaskList> newTaskLists = taskListMap.values();
+        if (newTaskLists.size() > 0 ) {
+            publishProgress( "Synchronizing Local Task List Changes", 0, newTaskLists.size() );
         }
 
         count = 0;
-		for ( TaskList localTask: tagValues ) {
+		for ( TaskList localList: newTaskLists ) {
             count++;
             publishProgress( null, count );
 
@@ -162,16 +182,20 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 			 * Determine if this task has been DELETED from the spreadsheet after the last synchronization
 			 * OR if it is a new task that has been added since the last synchronization.
 			 */
-			if ( localTask.getLastSynchroDate() == null || localTask.getLastSynchroDate().getTime() <= lastSynchronisation ) {
-				ds.delete( localTask );
+			if ( localList.getLastSynchroDate() == null || localList.getLastSynchroDate().getTime() <= lastSynchronisation ) {
+				ds.delete( localList );
 			} else {
-				ListEntry entry = tagsFromGoogle.createEntry();
-				updateTagEntry( entry, localTask );
-		            try {
-						tagsFromGoogle.insert( entry );
-					} catch (Exception e) {
-						throw new RuntimeException( "Unable to insert task '" + localTask.getName() + "' in the google spreadsheet (" + e.getMessage() + ")" );
-					}
+				WorksheetEntry entry = new WorksheetEntry();
+				entry.setTitle( new PlainTextConstruct( localList.getName() ));
+				// TODO: Inser the column in the worksheet to make it valid.
+				URL worksheetFeedUrl = spreadsheet.getWorksheetFeedUrl();
+	            try {
+					WorksheetEntry insert = getSpreadsheetService().insert(worksheetFeedUrl, entry);
+					localList.setGoogleId( insert.getId() );
+					ds.save(localList );
+				} catch (Exception e) {
+					throw new RuntimeException( "Unable to insert the new tab for task list: " + localList.getName() + " (" +e.getMessage() + ")" );
+				}
 				
 			}
 		}
@@ -182,26 +206,44 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 	 * Synchronize the task list with the Google spreadsheet.
 	 * 
 	 * @param context The context. (Activity)
-	 * @param lastSynchronisation The last synchronization timestamp.
 	 */
-	private void synchronizeTasks(Context context, long lastSynchronisation) {
-        publishProgress( "Synchronizing Task List", null, -1 );
+	private void synchronizeTasks(Context context ) throws Exception {
+        publishProgress( "Synchronizing Tasks", null, -1 );
 
-		TaskDatasource ds = new TaskDatasource( context);
+        SpreadsheetEntry spreadsheet = openSpreadsheet(context);
+        
+        for ( WorksheetEntry worksheet: spreadsheet.getWorksheets() ) {
+        	String listName = worksheet.getTitle().getPlainText();
+        	TaskList list = TaskListCache.getInstance().getByName( listName );
+        	synchronizeTasksForList( list, getSpreadsheetService().getFeed( worksheet.getListFeedUrl(), ListFeed.class) );
+        }
+	}
+	
+	/**
+	 * Synchronize the tasks for a specific task list. (Each task list is stored in its own
+	 * worksheet inside the google spreadsheet.
+	 * 
+	 * @param list The task list.
+	 * @param listFeed the List Feed to connect to.
+	 */
+	private void synchronizeTasksForList( TaskList list, ListFeed listFeed ) {
+		
+		TaskDatasource ds = new TaskDatasource( taskListActivity );
 		ds.open();
-		List<Task> localTasks = ds.getAllTasks();
+		
+		/*
+		 * First, load a map of the local tasks, existing in the database.
+		 */
+		List<Task> localTasks = ds.getAllTasksForList( list.getId() );
 		Map<Long, Task> taskMap = new HashMap<Long,Task>();
 		for ( Task localTask: localTasks ) {
 			taskMap.put( localTask.getId(), localTask );
 		}
 
-        publishProgress("Reading tasks from Google Spreadsheet");
-
-        ListFeed tasksFromGoogle = readTasksGoogleSpreadsheet(context);
-
-        List<ListEntry> googleEntries = tasksFromGoogle.getEntries();
+		List<ListEntry> googleEntries = listFeed.getEntries();
+		
         if ( googleEntries.size() > 0 ) {
-            publishProgress( "Processing Google Spreadsheet Tasks", 0, googleEntries.size() );
+            publishProgress( "Processing Google Spreadsheet Tasks (" + list.getName() +")", 0, googleEntries.size() );
         }
 
         int count = 0;
@@ -210,7 +252,7 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
             count++;
             publishProgress( null, count );
 
-			Task googleTask = listEntryToTask( taskEntry );
+			Task googleTask = listEntryToTask( taskEntry, list );
 			
 			Task localTask = taskMap.remove( googleTask.getId()  );
 			
@@ -252,10 +294,10 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 			if ( localTask.getLastSynchroDate() == null || localTask.getLastSynchroDate().getTime() <= lastSynchronisation ) {
 				ds.delete( localTask );
 			} else {
-				ListEntry entry = tasksFromGoogle.createEntry();
+				ListEntry entry = listFeed.createEntry();
 				updateTaskEntry( entry, localTask );
 		            try {
-						tasksFromGoogle.insert( entry );
+						listFeed.insert( entry );
 					} catch (Exception e) {
 						throw new RuntimeException( "unable to insert task '" + localTask.getName() + "' to the google Spreadsheet ( " + e.getMessage() + ")" );
 					}
@@ -279,7 +321,6 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		entry.getCustomElements().setValueLocal("estimatedprice", localTask.getEstimatedPrice() == null ? "": localTask.getEstimatedPrice().toPlainString() );
 		entry.getCustomElements().setValueLocal("notes", localTask.getNotes() == null ? "": localTask.getNotes() );
 		entry.getCustomElements().setValueLocal("reaprice", localTask.getRealPrice() == null ? "": localTask.getRealPrice().toPlainString() );
-		entry.getCustomElements().setValueLocal("tags", TaskListCache.getInstance().getById( localTask.getListId() ).getName() );
 		entry.getCustomElements().setValueLocal("id", String.valueOf( localTask.getId() ) );
 		try {
 			entry.update();
@@ -288,17 +329,9 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		
 	}
 	
-	private void updateTagEntry(ListEntry entry, TaskList localTag) {
-		entry.getCustomElements().setValueLocal("name", localTag.getName() );
-		try {
-			entry.update();
-		} catch (Exception e) {
-		}
-		
-	}	
-
-	private Task listEntryToTask( ListEntry entry ) {
+	private Task listEntryToTask( ListEntry entry, TaskList taskList ) {
     	Task task = new Task();
+    	task.setListId( taskList.getId() );
     	task.setName(entry.getCustomElements().getValue( "taskname" ));
 		task.setCompletedDate( entry.getCustomElements().getValue( "completeddate") );
 		task.setCreationDate( entry.getCustomElements().getValue( "creationDate") );
@@ -306,75 +339,35 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 		task.setEstimatedPrice( entry.getCustomElements().getValue( "estimatedprice") );
 		task.setNotes(entry.getCustomElements().getValue( "notes") );
 		task.setRealPrice( entry.getCustomElements().getValue( "realPrice")  );
-		String listName = entry.getCustomElements().getValue( "tags" );
-		if ( listName != null && !listName.isEmpty() ) {
-			TaskList list = TaskListCache.getInstance().getByName( listName );
-	    	task.setListId( list.getId() );
-		}
-				
     	String taskId = entry.getCustomElements().getValue( "id" );
     	if ( taskId != null && !taskId.isEmpty() ) {
         	task.setId( Long.parseLong( taskId ) );
-    		
     	}
     	return task;
 		
 	}
 	
-	private TaskList listEntryToTaskList( ListEntry entry ) {
-    	TaskList list = new TaskList();
-    	list.setName(entry.getCustomElements().getValue( "name" ));
-    	return list;
-	}
-	
-	
-	protected ListFeed readTasksGoogleSpreadsheet( Context context) {
-		SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
-		GoogleAccountInfo googleAccountInfo = new GoogleAccountInfo( sharedPreferences );
-
-		try {
-            SpreadsheetService service = new SpreadsheetService("Testing");
-            service.setUserCredentials(googleAccountInfo.getUsername(),  googleAccountInfo.getPassword() );
-            
-            URL listFeedURL = null;
-            
-            if ( googleAccountInfo.getTaskListFeed() == null || googleAccountInfo.getTaskListFeed().isEmpty() ) {
-            	SpreadsheetEntry spreadsheet = openSpreadsheet( service );
-            	
-                WorksheetEntry worksheet = spreadsheet.getWorksheets().get( 0 );
-                listFeedURL = worksheet.getListFeedUrl();
-                
-                googleAccountInfo.setTaskListFeed( listFeedURL.toString() );
-                googleAccountInfo.saveToPreferences( sharedPreferences );
-            } else {
-            	listFeedURL = new URL( googleAccountInfo.getTaskListFeed() );
-            }
-
-            return service.getFeed( listFeedURL, ListFeed.class );
-        } catch (Exception e) {
-        	/*
-        	 * Reset the List Feed caching, just in case it was the cause of the exception.
-        	 */
-            googleAccountInfo.setTaskListFeed( null );
-            googleAccountInfo.saveToPreferences( sharedPreferences );
-        	throw new RuntimeException ( e );
-        }		
-	}
-	
-	private SpreadsheetEntry openSpreadsheet( SpreadsheetService service ) throws Exception {
-        URL SPREADSHEET_FEED_URL = new URL( "https://spreadsheets.google.com/feeds/spreadsheets/private/full");
-
-        // Make a request to the API and get all spreadsheets.
-        SpreadsheetFeed feed = service.getFeed(SPREADSHEET_FEED_URL, SpreadsheetFeed.class);
-        List<SpreadsheetEntry> spreadsheets = feed.getEntries();
-
+	private SpreadsheetEntry openSpreadsheet( Context context ) {
+		
         SpreadsheetEntry spreadsheet = null;
-        for ( SpreadsheetEntry ss: spreadsheets ) {
-        	if ( ss.getTitle().getPlainText().equals( "todo") ) {
-        		spreadsheet = ss;
-        		break;
-        	}
+
+        try {
+			URL SPREADSHEET_FEED_URL = new URL( "https://spreadsheets.google.com/feeds/spreadsheets/private/full");
+	
+	        // Make a request to the API and get all spreadsheets.
+	        SpreadsheetFeed feed = getSpreadsheetService().getFeed(SPREADSHEET_FEED_URL, SpreadsheetFeed.class);
+	        List<SpreadsheetEntry> spreadsheets = feed.getEntries();
+	
+	        for ( SpreadsheetEntry ss: spreadsheets ) {
+	        	if ( ss.getTitle().getPlainText().equals( "todo") ) {
+	        		spreadsheet = ss;
+	        		break;
+	        	}
+	        }
+        } catch ( Exception e ) {
+        	throw new RuntimeException( "Unable to read the spreadsheet from google account: " + e.getMessage() );
         }
+        
         
         /*
          * 'todo' spreadsheet not found on the google drive.
@@ -401,57 +394,6 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
         return spreadsheet;
 	}
 
-	protected ListFeed readTagsGoogleSpreadsheet( Context context) {
-
-		SharedPreferences sharedPreferences = context.getSharedPreferences(ApplicationSettings.SETTINGS_LIST,  0 );
-		GoogleAccountInfo googleAccountInfo = new GoogleAccountInfo( sharedPreferences );
-		
-		try {
-
-            SpreadsheetService service = new SpreadsheetService("Testing");
-            service.setUserCredentials(googleAccountInfo.getUsername(),  googleAccountInfo.getPassword() );
-            
-            URL listFeedURL = null;
-            
-            if ( googleAccountInfo.getTagsFeed() == null || googleAccountInfo.getTagsFeed().isEmpty() ) {
-            	SpreadsheetEntry spreadsheet = openSpreadsheet( service );
-            	
-                /*
-                 * Create the tags worksheet if it doesn't exists. And the first header line
-                 */
-            	if ( spreadsheet.getWorksheets().size() < 2 ) {
-                	WorksheetEntry tagWorksheet = new WorksheetEntry();
-                	tagWorksheet.setTitle( new PlainTextConstruct( "Tags" ) );
-                	tagWorksheet.setRowCount( 15 );
-                	tagWorksheet.setColCount( 15 );
-                	tagWorksheet = service.insert( spreadsheet.getWorksheetFeedUrl(), tagWorksheet );
-                	
-                	URL cellFeedUrl= tagWorksheet.getCellFeedUrl();
-                	CellFeed cellFeed= service.getFeed (cellFeedUrl, CellFeed.class);
-                    CellEntry cellEntry= new CellEntry (1, 1, "name");
-                	cellFeed.insert (cellEntry);
-                }
-
-            	WorksheetEntry worksheet = spreadsheet.getWorksheets().get(1);
-                listFeedURL = worksheet.getListFeedUrl();
-                
-                googleAccountInfo.setTagsFeed( listFeedURL.toString() );
-                googleAccountInfo.saveToPreferences( sharedPreferences );
-            } else {
-            	listFeedURL = new URL( googleAccountInfo.getTagsFeed() );
-            }
-
-            return service.getFeed( listFeedURL, ListFeed.class );
-        } catch (Exception e) {
-        	/*
-        	 * Reset the List Feed caching, just in case it was the cause of the exception.
-        	 */
-            googleAccountInfo.setTagsFeed( null );
-            googleAccountInfo.saveToPreferences( sharedPreferences );
-        	throw new RuntimeException( e );
-        }		
-	}
-	
 	@Override
 	protected void onPreExecute() {
 		progressDialog.setTitle( "Synchronization");

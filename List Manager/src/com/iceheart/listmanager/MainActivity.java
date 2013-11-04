@@ -225,6 +225,7 @@ public class MainActivity extends FragmentActivity  {
            	  			 TaskListDatasource ds = new TaskListDatasource( MainActivity.this );
            	  			 ds.open();
            	  			 tl.setStatus( TaskListStatus.DELETED );
+           	  			 // TODO: Delete all task under this list.
            	  			 ds.save( tl );
            	  			 ds.close();
            	  			 refreshTaskList();

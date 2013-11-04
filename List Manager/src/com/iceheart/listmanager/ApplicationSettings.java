@@ -18,7 +18,6 @@ public interface ApplicationSettings {
 	 * For performance.
 	 */
 	String GOOGLE_LIST_FEED = "googleListFeed";
-	String GOOGLE_TAGS_FEED = "googleTagsFeed";
 	
 	/**
 	 * The timestamp of the last synchronization (google)

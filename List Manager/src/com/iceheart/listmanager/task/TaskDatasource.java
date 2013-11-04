@@ -242,4 +242,21 @@ public class TaskDatasource {
 		    return tasks;	
 	}
 
+	public List<Task> getAllTasksForList(Long listId) {
+		 List<Task> tasks = new ArrayList<Task>();
+		    Cursor cursor = database.rawQuery( "select * from task " +
+		    								   "where list_id = "+ listId, 
+		    								   null);
+
+		    cursor.moveToFirst();
+		    while (!cursor.isAfterLast()) {
+		      Task task = cursorToTask(cursor);
+		      tasks.add(task);
+		      cursor.moveToNext();
+		    }
+		    // Make sure to close the cursor
+		    cursor.close();
+		    return tasks;
+	}
+
 } 
