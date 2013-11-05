@@ -182,21 +182,22 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 			 * Determine if this task has been DELETED from the spreadsheet after the last synchronization
 			 * OR if it is a new task that has been added since the last synchronization.
 			 */
-			if ( localList.getLastSynchroDate() == null || localList.getLastSynchroDate().getTime() <= lastSynchronisation ) {
+			if ( localList.getLastSynchroDate() == null || localList.getLastSynchroDate().getTime() <= lastSynchronisation || localList.getStatus() == TaskListStatus.DELETED ) {
 				ds.delete( localList );
 			} else {
-				WorksheetEntry entry = new WorksheetEntry();
+				WorksheetEntry entry = new WorksheetEntry( 10, 10);
+				
 				entry.setTitle( new PlainTextConstruct( localList.getName() ));
-				// TODO: Inser the column in the worksheet to make it valid.
+				// TODO: Insert the column in the worksheet to make it valid.
 				URL worksheetFeedUrl = spreadsheet.getWorksheetFeedUrl();
 	            try {
+	            	
 					WorksheetEntry insert = getSpreadsheetService().insert(worksheetFeedUrl, entry);
 					localList.setGoogleId( insert.getId() );
 					ds.save(localList );
 				} catch (Exception e) {
 					throw new RuntimeException( "Unable to insert the new tab for task list: " + localList.getName() + " (" +e.getMessage() + ")" );
 				}
-				
 			}
 		}
 		ds.close();		
