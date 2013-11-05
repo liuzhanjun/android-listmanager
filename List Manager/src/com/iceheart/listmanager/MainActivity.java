@@ -8,6 +8,7 @@ import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,7 +53,7 @@ public class MainActivity extends FragmentActivity  {
 	
 	public static TaskList selectedList = new TaskList( TaskListType.SYSTEM_ALL );
 	private static boolean firstLoad = true;
-	private List<Task> tasks;
+	private ArrayList<Task> tasks;
 	private ActionBarDrawerToggle toggle;
 	private ShareActionProvider mShareActionProvider;
     private ViewPager mViewPager;
@@ -434,12 +435,12 @@ public class MainActivity extends FragmentActivity  {
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter {
         private final MainActivity mainActivity;
         private TaskList taskList;
-        private List<Task> incomingTaskForList;
-        private List<Task> incompleteTasksForList;
-        private List<Task> completedTasksForList;
+        private ArrayList<Task> incomingTaskForList;
+        private ArrayList<Task> incompleteTasksForList;
+        private ArrayList<Task> completedTasksForList;
 
 
-        public CollectionPagerAdapter(MainActivity mainActivity, TaskList taskList, List<Task> allTasksForList, FragmentManager fm) {
+        public CollectionPagerAdapter(MainActivity mainActivity, TaskList taskList, ArrayList<Task> allTasksForList, FragmentManager fm) {
             super(fm);
 
             this.mainActivity = mainActivity;
@@ -449,19 +450,22 @@ public class MainActivity extends FragmentActivity  {
 
         @Override
         public Fragment getItem(int position) {
-            ListFragment fragment = new ListFragment( mainActivity );
+            ListFragment fragment = new ListFragment();
+            Bundle args = new Bundle();
+
             switch( position ) {
                 default:
                 case 0:
-                    fragment.setArgObject(incomingTaskForList);
+                    args.putSerializable("tasks", incomingTaskForList);
                     break;
                 case 1:
-                    fragment.setArgObject(incompleteTasksForList);
+                    args.putSerializable("tasks", incompleteTasksForList);
                     break;
                 case 2:
-                    fragment.setArgObject(completedTasksForList);
+                    args.putSerializable("tasks", completedTasksForList);
                     break;
             }
+            fragment.setArguments(args);
             return fragment;
         }
 
@@ -506,17 +510,8 @@ public class MainActivity extends FragmentActivity  {
     // object in our collection.
     @SuppressLint("ValidFragment")
 	public static class ListFragment extends Fragment {
-        private final MainActivity mainActivity;
-        private List<Task> tasks;
-        
-        
-        
-        public ListFragment(MainActivity mainActivity) {
-            this.mainActivity = mainActivity;
-        }
 
-        public void setArgObject( List<Task> tasks ) {
-            this.tasks = tasks;
+        public ListFragment() {
         }
 
         @Override
@@ -532,7 +527,7 @@ public class MainActivity extends FragmentActivity  {
                     public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
                         @SuppressWarnings("unchecked")
                         Map<String,String> selectedTask = (Map<String,String>) (listView.getItemAtPosition(myItemInt));
-                        mainActivity.showTaskDialog(selectedTask);
+                        ((MainActivity)getActivity()).showTaskDialog(selectedTask);
 
                     }
                 });
@@ -540,12 +535,12 @@ public class MainActivity extends FragmentActivity  {
 
             // Convert the allTasksForTaskList to maps for the list view
             List<Map<String, Object>> adapterList = new ArrayList<Map<String,Object>>();
-            for ( Task task: tasks ) {
+            for ( Task task: (ArrayList<Task>)getArguments().getSerializable("tasks") ) {
                 adapterList.add(task.toMap());
             }
 
             // Create the adapter for the list view
-            SimpleAdapter adapter = new TaskRowAdapter(mainActivity, adapterList);
+            SimpleAdapter adapter = new TaskRowAdapter(((MainActivity)getActivity()), adapterList);
 
             listView.setAdapter( adapter );
 
