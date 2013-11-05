@@ -3,6 +3,6 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="10dp"
     android:layout_height="10dp"
-    android:background="@drawable/row_tag_color_background"
+    android:background="@drawable/task_row_color_background"
     >
 </ImageView>

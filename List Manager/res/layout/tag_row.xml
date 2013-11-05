@@ -35,11 +35,11 @@
         android:layout_height="@dimen/drawer_row_height"
         android:layout_alignParentRight="true"
         android:gravity="center"
-        android:layout_marginRight="5dp"
-        android:layout_marginLeft="5dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginLeft="4dp"
         android:focusable="false"
         android:singleLine="true"
         android:textAppearance="@style/menuTextCount"
-        android:background="@drawable/row_tag_color_background"/>
+        android:background="@drawable/tag_row_color_background"/>
 
 </RelativeLayout>

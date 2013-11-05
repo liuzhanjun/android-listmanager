@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:focusable="false"
     android:height="@dimen/row_height"
     android:padding="8dp"
@@ -59,30 +59,32 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_height="match_parent"
+        android:layout_height="fill_parent"
         android:layout_width="@dimen/row_price_width"
         android:layout_gravity="right"
         android:layout_alignParentRight="true"
         android:dividerPadding="@dimen/row_price_divider_padding"
         android:focusable="false"
-        >
+        android:layout_marginTop="2dp"
+        android:baselineAligned="false"
+        android:clickable="false">
 
         <ImageView
             android:id="@+id/rowFlag"
             android:layout_width="@dimen/row_img_width"
-            android:layout_height="@dimen/row_img_height"
-            android:layout_gravity="fill|top"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center_vertical|fill"
             android:focusable="false"
-            />
+            android:scaleType="center" />
 
         <TextView
             android:id="@+id/rowItemPrice"
             android:layout_width="75dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:gravity="right"
             android:focusable="false"
             android:singleLine="true"
-            android:textAppearance="@style/amountText" />
+            android:textAppearance="@style/priceText" />
 
     </LinearLayout>
 

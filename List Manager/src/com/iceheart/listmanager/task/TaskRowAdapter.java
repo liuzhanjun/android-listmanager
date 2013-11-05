@@ -2,7 +2,6 @@ package com.iceheart.listmanager.task;
 
 import android.annotation.SuppressLint;
 import android.graphics.drawable.GradientDrawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,7 +78,7 @@ public class TaskRowAdapter extends SimpleAdapter {
         String itemPrice = (String)entry.get("price");
         TextView itemTextView = (TextView) view.findViewById(R.id.rowItemPrice);
         if ( itemPrice != null && itemPrice.length() > 0 ) {
-            itemTextView.setBackgroundResource(R.drawable.row_price_background);
+            itemTextView.setBackgroundResource(R.drawable.task_row_price_background);
         } else {
             itemTextView.setBackgroundResource(0);
         }
