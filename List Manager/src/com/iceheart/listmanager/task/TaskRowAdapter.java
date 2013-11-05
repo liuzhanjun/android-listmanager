@@ -92,13 +92,9 @@ public class TaskRowAdapter extends SimpleAdapter {
             	// TODO: To revise (simplify since no more multiple task list.
             	List<TaskList> taskLists = new ArrayList<TaskList>();
             	taskLists.add( TaskListCache.getInstance().getById(taskListId));
-                //Log.d("tagsImageView,setAdapter", "number of rows in the tagslist:" + tags.size());
                 tagsListView.setAdapter(new TagColorViewAdapter(taskLists));
-                Log.d("tagsImageView,setAdapter", "width=" + tagsListView.getWidth());
-                Log.d("tagsImageView,setAdapter", "height=" + tagsListView.getHeight() );
             }
         } else {
-            //Log.d("tagsImageView,setAdapter", "transparent"  );
             tagsListView.setBackgroundResource(android.R.color.transparent);
         }
 

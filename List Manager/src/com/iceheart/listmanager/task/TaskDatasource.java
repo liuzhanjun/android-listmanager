@@ -106,8 +106,8 @@ public class TaskDatasource {
     return tasks;
   }
   
-  public List<Task> getAllActiveTasks() {
-	    List<Task> tasks = new ArrayList<Task>();
+  public ArrayList<Task> getAllActiveTasks() {
+	    ArrayList<Task> tasks = new ArrayList<Task>();
 
 	    Cursor cursor = database.rawQuery( 
 	    		"select * from task " +
@@ -182,8 +182,8 @@ public class TaskDatasource {
 	    return task;
 	}
 
-	public List<Task> findActiveTasksForList(Long listId ) {
-	    List<Task> tasks = new ArrayList<Task>();
+	public ArrayList<Task> findActiveTasksForList(Long listId ) {
+	    ArrayList<Task> tasks = new ArrayList<Task>();
 
 	    Cursor cursor = database.rawQuery( "select * from task " +
 	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
