@@ -43,9 +43,8 @@ public class TaskDatasource {
     }
     values.put( "creation_date", task.getCreationDate().getTime() );
     
-    if ( task.getLastSynchroDate() == null ) {
-    	task.setLastSynchroDate(new Date());
-    }
+   	task.setLastSynchroDate(new Date());
+    
     values.put( "last_synchro_date", task.getLastSynchroDate().getTime() );
     
     
