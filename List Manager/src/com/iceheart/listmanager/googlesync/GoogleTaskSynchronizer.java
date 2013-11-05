@@ -17,6 +17,8 @@ import android.os.AsyncTask;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.PlainTextConstruct;
+import com.google.gdata.data.spreadsheet.CellEntry;
+import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
@@ -41,6 +43,8 @@ import com.iceheart.listmanager.tasklist.TaskListStatus;
  *
  */
 public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> {
+	
+	// TODO: Revise for performance improvment (i.e. check last update date for the task and the spread sheet ?)
 	
 	private ProgressDialog progressDialog;
 	private MainActivity taskListActivity;
@@ -188,11 +192,30 @@ public class GoogleTaskSynchronizer extends AsyncTask<Context, Object, Boolean> 
 				WorksheetEntry entry = new WorksheetEntry( 10, 10);
 				
 				entry.setTitle( new PlainTextConstruct( localList.getName() ));
-				// TODO: Insert the column in the worksheet to make it valid.
 				URL worksheetFeedUrl = spreadsheet.getWorksheetFeedUrl();
 	            try {
 	            	
 					WorksheetEntry insert = getSpreadsheetService().insert(worksheetFeedUrl, entry);
+					
+					URL cellFeedUrl = insert.getCellFeedUrl();
+                	CellFeed cellFeed = getSpreadsheetService().getFeed(cellFeedUrl, CellFeed.class);
+                    CellEntry cellEntry = new CellEntry (1, 1, "Task name");
+                	cellFeed.insert (cellEntry);
+                    cellEntry = new CellEntry (1, 2, "Due Date");
+                	cellFeed.insert (cellEntry);
+                    cellEntry = new CellEntry (1, 3, "Estimated Price");
+                	cellFeed.insert (cellEntry);
+                    cellEntry = new CellEntry (1, 4, "Notes");
+                	cellFeed.insert (cellEntry);
+                	cellEntry = new CellEntry (1, 5, "Completed Date");
+                	cellFeed.insert (cellEntry);                	
+                	cellEntry = new CellEntry (1, 6, "Real Price");
+                	cellFeed.insert (cellEntry);                	
+                	cellEntry = new CellEntry (1, 7, "Creation Date");
+                	cellFeed.insert (cellEntry);                	
+                	cellEntry = new CellEntry (1, 8, "id");
+                	cellFeed.insert (cellEntry);                	
+                	
 					localList.setGoogleId( insert.getId() );
 					ds.save(localList );
 				} catch (Exception e) {
