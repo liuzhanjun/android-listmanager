@@ -8,7 +8,6 @@ import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -190,31 +189,24 @@ public class MainActivity extends FragmentActivity  {
         }       
         ds.close();
         
-        List<Map<String, Object>> taskLists = new ArrayList<Map<String, Object>>();
+        List<TaskList> taskLists = new ArrayList<TaskList>();
         
-        taskLists.add(new TaskList(TaskListType.SYSTEM_ALL).toMap());
-        for ( TaskList taskList: this.taskListsCache.getTaskLists()) {
-            taskLists.add(taskList.toMap());
-        }
-        taskLists.add(new TaskList(TaskListType.SYSTEM_NEW_LIST).toMap());
+        taskLists.add(new TaskList(TaskListType.SYSTEM_ALL));
+        taskLists.addAll( taskListsCache.getTaskLists() );
+        taskLists.add(new TaskList(TaskListType.SYSTEM_NEW_LIST));
         
         final ListView taskListListView = (ListView) findViewById(R.id.taskListListView);
         taskListListView.setAdapter(new TaskListRowAdapter(this, taskLists));
         
-        
         taskListListView.setOnItemLongClickListener( new OnItemLongClickListener() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, final int itemPos, long lng) {
 				
-  	  			 final Map<String,Object> selectedTaskList = (Map<String,Object>)taskListListView.getItemAtPosition( itemPos );
-  	  			 
-  	  			 final TaskList tl = (TaskList) selectedTaskList.get( "list" );
+  	  			 final TaskList tl = (TaskList) taskListListView.getItemAtPosition( itemPos );
   	  			 if ( tl.getType() != TaskListType.USER_DEFINED ) {
   	  				 return false;
   	  			 }
-  	  			 
 
 				 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
            	  	 builder.setTitle(R.string.delete_list);
@@ -251,9 +243,8 @@ public class MainActivity extends FragmentActivity  {
         taskListListView.setOnItemClickListener(new OnItemClickListener() {
         	
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
-              @SuppressWarnings("unchecked")
-              Map<String,Object> selectedListObj = (Map<String,Object>) (taskListListView.getItemAtPosition(myItemInt));
-              selectedList = (TaskList) selectedListObj.get("list");
+              
+              selectedList = (TaskList) (taskListListView.getItemAtPosition(myItemInt));
               
               
               if ( selectedList.getType() == TaskListType.SYSTEM_NEW_LIST ) {

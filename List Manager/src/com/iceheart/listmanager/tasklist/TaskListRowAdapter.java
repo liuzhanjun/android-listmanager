@@ -1,51 +1,75 @@
 package com.iceheart.listmanager.tasklist;
 
+import java.util.List;
+
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.iceheart.listmanager.MainActivity;
 import com.iceheart.listmanager.R;
 
-import java.util.List;
-import java.util.Map;
-
 /**
 * Created by nmasse on 10/22/13.
 */
-public class TaskListRowAdapter extends SimpleAdapter {
+public class TaskListRowAdapter extends BaseAdapter {
 
     private MainActivity mainActivity;
+    private List<TaskList> taskList;
 
-    public TaskListRowAdapter(MainActivity mainActivity, List<Map<String, Object>> mylist) {
-        super(mainActivity, mylist, R.layout.tag_row, new String[]{"name", "taskCount"}, new int[]{R.id.rowTagName, R.id.rowTagTaskCount});
+    public TaskListRowAdapter(MainActivity mainActivity, List<TaskList> mylist) {
+    	super();
+    	
+//        super(mainActivity, mylist, R.layout.tag_row, new String[]{"name", "taskCount"}, new int[]{R.id.rowTagName, R.id.rowTagTaskCount});
         this.mainActivity = mainActivity;
+        this.taskList = mylist;
     }
 
     @SuppressWarnings("unchecked")
 	@Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = super.getView(position, convertView, parent);
+        View view = mainActivity.getLayoutInflater().inflate(R.layout.tag_row, null);
 
         ImageView iconView = (ImageView) view.findViewById(R.id.rowTagIcon);
         TextView tagCountView = (TextView) view.findViewById(R.id.rowTagTaskCount);
+        TaskList tlist = taskList.get( position );
+        TextView tagName = (TextView) view.findViewById(R.id.rowTagName);
+        
+        tagCountView.setText( String.valueOf(tlist.getTaskCount()) );
+        tagName.setText( tlist.getName() );
 
-        TaskList tag = (TaskList) ((Map<String, Object>)this.getItem(position)).get("list");
-
-        if ( tag != null ) {
-            int resourceId = tag.getIconId();
+        if ( tlist != null ) {
+            int resourceId = tlist.getIconId();
             iconView.setImageResource(resourceId);
 
             GradientDrawable back = (GradientDrawable) tagCountView.getBackground();
 
-            back.setColor(mainActivity.getResources().getColor(tag.getTagColor()));
+            back.setColor(mainActivity.getResources().getColor(tlist.getTagColor()));
         }
-
 
         return view;
     }
+
+	@Override
+	public int getCount() {
+		return taskList.size();
+	}
+
+	@Override
+	public Object getItem(int index ) {
+		return taskList.get( index );
+	}
+
+	@Override
+	public long getItemId(int index) {
+		if ( taskList.size() <= index ) {
+			return -1;
+		}
+		TaskList list = taskList.get( index );
+		return list.getId() == null ? -index: list.getId();
+	}
 
 }

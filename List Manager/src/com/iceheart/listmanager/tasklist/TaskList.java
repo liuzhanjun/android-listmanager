@@ -112,19 +112,6 @@ public class TaskList {
 		
 	}
 
-	public Map<String, Object> toMap() {
-		Map<String,Object> map = new HashMap<String,Object>();
-		map.put( "name", name);
-		if ( getTaskCount() > 0 ) {
-			map.put( "taskCount", String.valueOf( getTaskCount() ));
-		} else if ( getType() == TaskListType.USER_DEFINED ) {
-            map.put( "taskCount", String.valueOf( 0 ));
-        }
-		
-		map.put( "list", this );
-		return map;
-	}
-
 	public TaskListStatus getStatus() {
 		return status;
 	}
