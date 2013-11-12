@@ -82,7 +82,13 @@ public class Task implements Serializable {
 		map.put( "name", name);
 		map.put( "price", estimatedPrice == null ? "": estimatedPrice.toString() +" $" );
 		map.put( "dueDate", getDueDate() == null ? "": DATE_FORMAT.format( getDueDate() ) );
-		map.put( "formattedDueDate", getFormattedDueDate() );
+		// TODO: Get rid of this method and put this logic in the TaskRowAdapter.
+		if ( isCompleted() ) {
+			map.put( "formattedDueDate", DATE_FORMAT.format(completedDate) );	
+		} else {
+			map.put( "formattedDueDate", getFormattedDueDate() );
+		}
+		
         map.put( "task", this );
 
 		return map;

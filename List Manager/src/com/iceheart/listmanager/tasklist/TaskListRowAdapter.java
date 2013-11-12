@@ -22,13 +22,10 @@ public class TaskListRowAdapter extends BaseAdapter {
 
     public TaskListRowAdapter(MainActivity mainActivity, List<TaskList> mylist) {
     	super();
-    	
-//        super(mainActivity, mylist, R.layout.tag_row, new String[]{"name", "taskCount"}, new int[]{R.id.rowTagName, R.id.rowTagTaskCount});
         this.mainActivity = mainActivity;
         this.taskList = mylist;
     }
 
-    @SuppressWarnings("unchecked")
 	@Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = mainActivity.getLayoutInflater().inflate(R.layout.tag_row, null);

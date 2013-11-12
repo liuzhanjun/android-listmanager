@@ -1,5 +1,12 @@
 package com.iceheart.listmanager.task;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import android.annotation.SuppressLint;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
@@ -15,13 +22,6 @@ import com.iceheart.listmanager.MainActivity;
 import com.iceheart.listmanager.R;
 import com.iceheart.listmanager.tasklist.TaskList;
 import com.iceheart.listmanager.tasklist.TaskListCache;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
 * Created by nmasse on 10/22/13.
@@ -51,7 +51,8 @@ public class TaskRowAdapter extends SimpleAdapter {
 
         Map<String, Object> entry = (Map<String, Object>) this.getItem(position);
         String itemDueDate = (String)entry.get("dueDate");
-        if ( itemDueDate != null && itemDueDate.length() > 0 ) {
+        Task task = (Task) entry.get( "task" );
+        if ( itemDueDate != null && itemDueDate.length() > 0 && !task.isCompleted() ) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
 
             ImageView itemImageView = (ImageView) view.findViewById(R.id.rowFlag);
@@ -83,7 +84,6 @@ public class TaskRowAdapter extends SimpleAdapter {
             itemTextView.setBackgroundResource(0);
         }
 
-        Task task = (Task)entry.get("task");
         Long taskListId = task.getListId();
         ListView tagsListView = (ListView) view.findViewById(R.id.tagColorView);
         if ( taskListId != null ) {
