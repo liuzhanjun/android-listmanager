@@ -76,31 +76,17 @@ public class Task implements Serializable {
 	public void setListId(Long listId) {
 		this.listId = listId;
 	}
-	public Map<String, Object> toMap() {
-		Map<String,Object> map = new HashMap<String,Object>();
-		map.put( "id", id.toString());
-		map.put( "name", name);
-		map.put( "price", estimatedPrice == null ? "": estimatedPrice.toString() +" $" );
-		map.put( "dueDate", getDueDate() == null ? "": DATE_FORMAT.format( getDueDate() ) );
-		// TODO: Get rid of this method and put this logic in the TaskRowAdapter.
-		if ( isCompleted() ) {
-			map.put( "formattedDueDate", DATE_FORMAT.format(completedDate) );	
-		} else {
-			map.put( "formattedDueDate", getFormattedDueDate() );
-		}
-		
-        map.put( "task", this );
-
-		return map;
-	}
 	
-	
-	private String getFormattedDueDate() {
+	public String getFormattedDueDate() {
 		if ( dueDate == null ) {
 			return "";
 		}
 		
-		 String formattedDate = DATE_FORMAT.format(dueDate);	
+		 String formattedDate = DATE_FORMAT.format(dueDate);
+		 
+		 if ( isCompleted() ) {
+			 return formattedDate;
+		 }
 
 		long today = System.currentTimeMillis();
 		long dueDateTime = dueDate.getTime();

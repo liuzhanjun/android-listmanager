@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -34,7 +33,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ShareActionProvider;
-import android.widget.SimpleAdapter;
 
 import com.iceheart.listmanager.googlesync.GoogleTaskSynchronizer;
 import com.iceheart.listmanager.task.Task;
@@ -312,12 +310,7 @@ public class MainActivity extends FragmentActivity  {
 		startActivity( intent );
 	}
 	
-	public void showTaskDialog(Map<String,String> taskInfo ) {
-		
-		 final TaskDatasource ds = new TaskDatasource( this);
-	      ds.open();
-	     final Task task = ds.getTaskById( Long.valueOf( taskInfo.get( "id" ) ) );
-	     ds.close();
+	public void showTaskDialog( final Task task ) {
 		
     	AlertDialog.Builder builder = new AlertDialog.Builder( this );
     	builder.setMessage( task.getNotes());
@@ -327,6 +320,7 @@ public class MainActivity extends FragmentActivity  {
             		public void onClick(DialogInterface dialog, int id) {
             			task.setCompletedDate( new Date() );
             			// TODO: Ask for final price if any
+            			TaskDatasource ds = new TaskDatasource(MainActivity.this );
             			 ds.open();
             			 ds.save( task );
             		     ds.close();
@@ -342,6 +336,7 @@ public class MainActivity extends FragmentActivity  {
     		public void onClick(DialogInterface dialog, int id) {
     			task.setStatus(TaskStatus.DELETED);
     			task.setLastSynchroDate( new Date() );
+    			TaskDatasource ds = new TaskDatasource(MainActivity.this );
 	   			 ds.open();
 	   			 ds.save( task );
 	   		     ds.close();         
@@ -505,7 +500,8 @@ public class MainActivity extends FragmentActivity  {
         public ListFragment() {
         }
 
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
         public View onCreateView(LayoutInflater inflater,
                                  ViewGroup container, Bundle savedInstanceState) {
 
@@ -516,8 +512,7 @@ public class MainActivity extends FragmentActivity  {
                 listView.setOnItemClickListener(new OnItemClickListener() {
 
                     public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long mylng) {
-                        @SuppressWarnings("unchecked")
-                        Map<String,String> selectedTask = (Map<String,String>) (listView.getItemAtPosition(myItemInt));
+                        Task selectedTask = (Task) (listView.getItemAtPosition(myItemInt));
                         ((MainActivity)getActivity()).showTaskDialog(selectedTask);
 
                     }
@@ -525,13 +520,13 @@ public class MainActivity extends FragmentActivity  {
             }
 
             // Convert the allTasksForTaskList to maps for the list view
-            List<Map<String, Object>> adapterList = new ArrayList<Map<String,Object>>();
+            List<Task> adapterList = new ArrayList<Task>();
             for ( Task task: (ArrayList<Task>)getArguments().getSerializable("tasks") ) {
-                adapterList.add(task.toMap());
+                adapterList.add(task);
             }
 
             // Create the adapter for the list view
-            SimpleAdapter adapter = new TaskRowAdapter(((MainActivity)getActivity()), adapterList);
+            TaskRowAdapter adapter = new TaskRowAdapter(((MainActivity)getActivity()), adapterList);
 
             listView.setAdapter( adapter );
 

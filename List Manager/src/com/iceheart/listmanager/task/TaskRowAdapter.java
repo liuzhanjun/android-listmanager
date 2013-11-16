@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.graphics.drawable.GradientDrawable;
@@ -13,9 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.iceheart.listmanager.MainActivity;
@@ -26,13 +25,14 @@ import com.iceheart.listmanager.tasklist.TaskListCache;
 /**
 * Created by nmasse on 10/22/13.
 */
-public class TaskRowAdapter extends SimpleAdapter {
+public class TaskRowAdapter extends BaseAdapter {
 
     private MainActivity mainActivity;
     private Calendar today;
+    private List<Task> taskList;
 
-    public TaskRowAdapter(MainActivity mainActivity, List<Map<String, Object>> mylist) {
-        super(mainActivity, mylist, R.layout.task_list_row, new String[]{"name", "price", "formattedDueDate"}, new int[]{R.id.rowItemName, R.id.rowItemPrice, R.id.rowItemDate});
+    public TaskRowAdapter(MainActivity mainActivity, List<Task> taskList) {
+    	this.taskList = taskList;
         this.mainActivity = mainActivity;
         today = Calendar.getInstance();
         today.setTime(new Date());
@@ -44,14 +44,13 @@ public class TaskRowAdapter extends SimpleAdapter {
     }
 
     @SuppressLint("SimpleDateFormat")
-	@SuppressWarnings("unchecked")
 	@Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = super.getView(position, convertView, parent);
+    	View view = mainActivity.getLayoutInflater().inflate(R.layout.task_list_row, null);
 
-        Map<String, Object> entry = (Map<String, Object>) this.getItem(position);
-        String itemDueDate = (String)entry.get("dueDate");
-        Task task = (Task) entry.get( "task" );
+        Task task = (Task) this.getItem( position);
+        
+        String itemDueDate = task.getDueDate() == null ? null: Task.DATE_FORMAT.format( task.getDueDate() );
         if ( itemDueDate != null && itemDueDate.length() > 0 && !task.isCompleted() ) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy/MM/dd" );
 
@@ -75,11 +74,18 @@ public class TaskRowAdapter extends SimpleAdapter {
                 itemImageView.setImageResource(0);
             }
         }
+        
+        TextView itemName = (TextView) view.findViewById(R.id.rowItemName );
+        itemName.setText( task.getName() );
+        
+        TextView dateField = (TextView) view.findViewById( R.id.rowItemDate );
+        dateField.setText( task.getFormattedDueDate());
 
-        String itemPrice = (String)entry.get("price");
+        String itemPrice = task.getEstimatedPrice() == null ? "": task.getEstimatedPrice().toString() + " $";
         TextView itemTextView = (TextView) view.findViewById(R.id.rowItemPrice);
         if ( itemPrice != null && itemPrice.length() > 0 ) {
             itemTextView.setBackgroundResource(R.drawable.task_row_price_background);
+            itemTextView.setText( itemPrice );
         } else {
             itemTextView.setBackgroundResource(0);
         }
@@ -130,4 +136,19 @@ public class TaskRowAdapter extends SimpleAdapter {
             return convertView;
         }
     }
+
+	@Override
+	public int getCount() {
+		return taskList.size();
+	}
+
+	@Override
+	public Object getItem(int index ) {
+		return taskList.get( index );
+	}
+
+	@Override
+	public long getItemId(int index ) {
+		return  ((Task) taskList.get(index)).getId();
+	}
 }
