@@ -39,6 +39,14 @@ public class TaskListCache {
 		TaskListDatasource ds = new TaskListDatasource( context );
         ds.open();
         taskLists =  ds.getAllActive();
+        
+        /*
+         * For each list, get the number of tasks
+         */
+        for ( TaskList taskList: taskLists ) {
+        	ds.calculateActiveTaskCount(taskList);
+        }       
+        
         ds.close();		
 	}
 	

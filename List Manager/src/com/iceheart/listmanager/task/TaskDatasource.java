@@ -124,7 +124,6 @@ public class TaskDatasource {
 	    return tasks;
 	  }
   
-
   private Task cursorToTask(Cursor cursor) {
     Task task = new Task();
     task.setId(cursor.getLong(0));
@@ -181,13 +180,27 @@ public class TaskDatasource {
 	    return task;
 	}
 
+	/**
+	 * Find all NON-COMPLETED task for a specific list.
+	 * listId = null -> ALL list.
+	 * @param listId
+	 * @return
+	 */
 	public ArrayList<Task> findActiveTasksForList(Long listId ) {
 	    ArrayList<Task> tasks = new ArrayList<Task>();
 
-	    Cursor cursor = database.rawQuery( "select * from task " +
-	    								   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
-	    								   "and list_id = "+ listId + " " +
-	    								   "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
+	    
+	    String queryString = "select * from task " +
+				   "where status = '" + TaskStatus.ACTIVE.name() + "' " +
+				   "and completed_date is null ";
+	    
+	    if ( listId != null ) {
+		   queryString += "and list_id = "+ listId + " ";
+	    }
+
+	    queryString += "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date";
+				   
+	    Cursor cursor = database.rawQuery( queryString, null);
 
 	    cursor.moveToFirst();
 	    while (!cursor.isAfterLast()) {
@@ -200,15 +213,23 @@ public class TaskDatasource {
 	    return tasks;
 	}
 
-	public List<Task> findIncomingTask() {
-		 List<Task> tasks = new ArrayList<Task>();
+	public ArrayList<Task> findIncomingTask( Long listId ) {
+		 ArrayList<Task> tasks = new ArrayList<Task>();
 		 
-		    Cursor cursor = database.rawQuery( 
-		    		"select * from task " +
-		    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
-		    		"and due_date <= " + (System.currentTimeMillis() + (7 * 24*60*60*1000 )) + " " +
-		    		"and completed_date is null "  +
-		    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
+		 String queryString =
+				 "select * from task " +
+				    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
+				    		"and due_date <= " + (System.currentTimeMillis() + (7 * 24*60*60*1000 )) + " " +
+				    		"and completed_date is null ";
+		 
+		 
+		 if ( listId != null ) {
+			 queryString += "and list_id = " + listId + " ";
+		 }
+		 
+		 queryString += "order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date";
+		 
+		 Cursor cursor = database.rawQuery( queryString, null);
 
 		    cursor.moveToFirst();
 		    while (!cursor.isAfterLast()) {
@@ -221,24 +242,29 @@ public class TaskDatasource {
 		    return tasks; 
 		}
 
-	public List<Task> getAllCompletedTasks() {
-		 List<Task> tasks = new ArrayList<Task>();
+	public ArrayList<Task> getAllCompletedTasks( Long listId ) {
+		 ArrayList<Task> tasks = new ArrayList<Task>();
 
-		    Cursor cursor = database.rawQuery( 
-		    		"select * from task " +
+		 String queryString = "select * from task " +
 		    		"where status = '" + TaskStatus.ACTIVE.name() + "' " +
-		    		"and completed_date is not null " + 
-		    		"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date", null);
+		    		"and completed_date is not null ";
+		 
+		 if ( listId != null ) {
+			 queryString += "and list_id = " + listId + " ";
+		 }
+		 queryString +=	"order by COALESCE(due_date, " + Long.MAX_VALUE + "), creation_date";
+		 
+	    Cursor cursor = database.rawQuery(queryString, null);
 
-		    cursor.moveToFirst();
-		    while (!cursor.isAfterLast()) {
-		      Task task = cursorToTask(cursor);
-		      tasks.add(task);
-		      cursor.moveToNext();
-		    }
-		    // Make sure to close the cursor
-		    cursor.close();
-		    return tasks;	
+	    cursor.moveToFirst();
+	    while (!cursor.isAfterLast()) {
+	      Task task = cursorToTask(cursor);
+	      tasks.add(task);
+	      cursor.moveToNext();
+	    }
+	    // Make sure to close the cursor
+	    cursor.close();
+	    return tasks;	
 	}
 
 	public List<Task> getAllTasksForList(Long listId) {

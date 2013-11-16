@@ -3,7 +3,9 @@ package com.iceheart.listmanager;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -19,6 +21,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v4.widget.DrawerLayout;
 import android.text.InputType;
 import android.util.Log;
@@ -46,6 +49,7 @@ import com.iceheart.listmanager.tasklist.TaskListRowAdapter;
 import com.iceheart.listmanager.tasklist.TaskListStatus;
 import com.iceheart.listmanager.tasklist.TaskListType;
 
+@SuppressLint("UseSparseArrays")
 public class MainActivity extends FragmentActivity  {
 	
 	public static TaskList selectedList = new TaskList( TaskListType.SYSTEM_ALL );
@@ -125,41 +129,22 @@ public class MainActivity extends FragmentActivity  {
     }
     
 	public void refreshTasks() {
-		TaskDatasource ds = new TaskDatasource( this);
-        ds.open();
-
-        if ( selectedList == null || selectedList.getType() == TaskListType.SYSTEM_ALL ) {
-            tasks = ds.getAllActiveTasks();
-        } else {
-            tasks = ds.findActiveTasksForList( selectedList.getId() );
-        }
-        ds.close();
-
-        
-        String title = selectedList.getName();
-        if ( tasks.size() > 0 ) {
-        	
-            title += " (" + tasks.size() + " ";
-            title += tasks.size() > 1? getString(R.string.suffix_items):getString(R.string.suffix_item);
-            BigDecimal totalPrice = new BigDecimal( 0 );
-            for ( Task task: tasks ) {
-            	if ( task.getEstimatedPrice() != null ) {
-            		totalPrice = totalPrice.add( task.getEstimatedPrice() );
-            	}
-            }
-            
-            if ( totalPrice.compareTo( BigDecimal.ZERO ) > 0 ) {
-            	title += " , " + totalPrice + "$";
-            }
-            title += ")";
-        }
-        setTitle( title );
-        setShareContent( tasks );
-
-        // Create a new set of pages for the tabs based on the new allTasksForTaskList
-        CollectionPagerAdapter pagerAdapter = new CollectionPagerAdapter(this, selectedList, tasks, getSupportFragmentManager());
+        // Create a new set of pages for the tabs based on the new TaskList
+        final CollectionPagerAdapter pagerAdapter = new CollectionPagerAdapter(this, selectedList, getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-
+        setTitle( pagerAdapter.getMainPageTitle( 0 ) );
+        mViewPager.setOnPageChangeListener( new OnPageChangeListener() {
+			
+			@Override
+			public void onPageSelected(int position) {
+				setTitle( pagerAdapter.getMainPageTitle( position ) );
+			}
+			
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {}
+			@Override
+			public void onPageScrollStateChanged(int arg0) {}
+		});
 	}
 	
 	public void refreshTaskList() {
@@ -174,18 +159,6 @@ public class MainActivity extends FragmentActivity  {
         } else {
             taskListsCache.refreshCache();
         }
-        
-        TaskListDatasource ds = new TaskListDatasource( this );
-        ds.open();
-        
-        /*
-         * For each list, get the number of task
-         * TODO: MOve in the TaskListCache.. ?
-         */
-        for ( TaskList taskList: taskListsCache.getTaskLists() ) {
-        	ds.calculateActiveTaskCount(taskList);
-        }       
-        ds.close();
         
         List<TaskList> taskLists = new ArrayList<TaskList>();
         
@@ -216,7 +189,7 @@ public class MainActivity extends FragmentActivity  {
            	  			 TaskListDatasource ds = new TaskListDatasource( MainActivity.this );
            	  			 ds.open();
            	  			 tl.setStatus( TaskListStatus.DELETED );
-           	  			 // TODO: Delete all task under this list.
+           	  			 // TODO: Delete all tasks under this list.
            	  			 ds.save( tl );
            	  			 ds.close();
            	  			 refreshTaskList();
@@ -419,41 +392,82 @@ public class MainActivity extends FragmentActivity  {
     // Since this is an object collection, use a FragmentStatePagerAdapter,
     // and NOT a FragmentPagerAdapter.
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter {
+    	
+    	private static final int INCOMING 	= 0;
+    	private static final int ALL 		= 1;
+    	private static final int COMPLETED 	= 2;
+    	
         private final MainActivity mainActivity;
         private TaskList taskList;
-        private ArrayList<Task> incomingTaskForList;
-        private ArrayList<Task> incompleteTasksForList;
-        private ArrayList<Task> completedTasksForList;
+        private Map<Integer,ArrayList<Task>> tasks = new HashMap<Integer,ArrayList<Task>>();
 
-
-        public CollectionPagerAdapter(MainActivity mainActivity, TaskList taskList, ArrayList<Task> allTasksForList, FragmentManager fm) {
+        public CollectionPagerAdapter(MainActivity mainActivity, TaskList taskList, FragmentManager fm) {
             super(fm);
-
             this.mainActivity = mainActivity;
             this.taskList = taskList;
-            setTaskList(allTasksForList);
         }
+        
 
-        @Override
+        public CharSequence getMainPageTitle(int position) {
+            String title = selectedList.getName();
+            
+            ArrayList<Task> tasksToDisplay = getTaskListForPage(position);
+            if ( tasksToDisplay.size() > 0 ) {
+            	
+                title += " (" + tasksToDisplay.size() + " ";
+                title += tasksToDisplay.size() > 1? mainActivity.getString(R.string.suffix_items): mainActivity.getString(R.string.suffix_item);
+                BigDecimal totalPrice = new BigDecimal( 0 );
+                for ( Task task: tasksToDisplay ) {
+                	if ( task.getEstimatedPrice() != null ) {
+                		totalPrice = totalPrice.add( task.getEstimatedPrice() );
+                	}
+                }
+                
+                if ( totalPrice.compareTo( BigDecimal.ZERO ) > 0 ) {
+                	title += " , " + totalPrice + "$";
+                }
+                title += ")";
+            }
+            return title;
+		}
+
+
+		@Override
         public Fragment getItem(int position) {
+			ArrayList<Task> tasksToDisplay = getTaskListForPage( position );
+			mainActivity.setShareContent( tasksToDisplay ); // TODO: Determine if this is correct or if we should move this elswhere.
             ListFragment fragment = new ListFragment();
             Bundle args = new Bundle();
-
-            switch( position ) {
-                default:
-                case 0:
-                    args.putSerializable("tasks", incomingTaskForList);
-                    break;
-                case 1:
-                    args.putSerializable("tasks", incompleteTasksForList);
-                    break;
-                case 2:
-                    args.putSerializable("tasks", completedTasksForList);
-                    break;
-            }
+            args.putSerializable("tasks", tasksToDisplay);
             fragment.setArguments(args);
             return fragment;
         }
+		
+		
+		public ArrayList<Task> getTaskListForPage( int pageIndex ) {
+			ArrayList<Task> tasksToDisplay = tasks.get( pageIndex );
+    	
+			if ( tasksToDisplay == null ) {
+				TaskDatasource ds = new TaskDatasource( mainActivity );
+				ds.open();
+
+				Long listId = (selectedList != null ) ? selectedList.getId(): null;
+				switch( pageIndex ) {
+				case INCOMING:
+					tasksToDisplay = ds.findIncomingTask( listId );
+					break;
+				case ALL:
+					tasksToDisplay = ds.findActiveTasksForList( selectedList.getId() );
+					break;
+				case COMPLETED:
+					tasksToDisplay = ds.getAllCompletedTasks( listId );
+					break;
+				}
+				tasks.put( pageIndex, tasksToDisplay );
+				ds.close();
+			}
+			return tasksToDisplay;
+		}
 
         @Override
         public int getCount() {
@@ -473,24 +487,8 @@ public class MainActivity extends FragmentActivity  {
             }
         }
 
-        private void setTaskList( List<Task> tasks ) {
-            this.incompleteTasksForList = new ArrayList<Task>();
-            this.completedTasksForList = new ArrayList<Task>();
-            this.incomingTaskForList = new ArrayList<Task>();
-            
-            for( Task task : tasks ) {
-                if ( !task.isCompleted() ) {
-                    incompleteTasksForList.add(task);
-                    if ( task.isComingSoon() ) {
-                    	incomingTaskForList.add( task );
-                    }
-                } else {
-                    completedTasksForList.add(task);
-                }
-            }
-
-        }
     }
+    
 
     // Instances of this class are fragments representing a single
     // object in our collection.
@@ -499,12 +497,12 @@ public class MainActivity extends FragmentActivity  {
 
         public ListFragment() {
         }
-
+        
         @SuppressWarnings("unchecked")
 		@Override
         public View onCreateView(LayoutInflater inflater,
                                  ViewGroup container, Bundle savedInstanceState) {
-
+        	
             final ListView listView = (ListView) inflater.inflate( R.layout.task_list, container, false );
 
             // Add the click listener to view/edit the taks
@@ -529,7 +527,7 @@ public class MainActivity extends FragmentActivity  {
             TaskRowAdapter adapter = new TaskRowAdapter(((MainActivity)getActivity()), adapterList);
 
             listView.setAdapter( adapter );
-
+            
             return listView;
 
         }
