@@ -132,19 +132,25 @@ public class MainActivity extends FragmentActivity  {
         // Create a new set of pages for the tabs based on the new TaskList
         final CollectionPagerAdapter pagerAdapter = new CollectionPagerAdapter(this, selectedList, getSupportFragmentManager());
         mViewPager.setAdapter(pagerAdapter);
-        setTitle( pagerAdapter.getMainPageTitle( 0 ) );
-        mViewPager.setOnPageChangeListener( new OnPageChangeListener() {
+        OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
 			
 			@Override
 			public void onPageSelected(int position) {
 				setTitle( pagerAdapter.getMainPageTitle( position ) );
+				setShareContent( pagerAdapter.getTaskListForPage(position ) );				
 			}
 			
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {}
 			@Override
 			public void onPageScrollStateChanged(int arg0) {}
-		});
+		};
+		
+		// Force the selection of the first page (to trigger event)
+		onPageChangeListener.onPageSelected( 0 );
+		
+        mViewPager.setOnPageChangeListener( onPageChangeListener );
+        
 	}
 	
 	public void refreshTaskList() {
@@ -355,10 +361,13 @@ public class MainActivity extends FragmentActivity  {
 	
 	private String getShareListContent(List<Task> tasks) {
 		
+		// TODO: HTML CONTENT ?
+		
 		StringBuffer buffer = new StringBuffer();
+		int taskCount = tasks == null ? 0: tasks.size();
 		
 		if ( selectedList != null ) {
-			buffer.append( selectedList.getName() + " (" + selectedList.getTaskCount() + getString(R.string.suffix_items) + ")" );
+			buffer.append( selectedList.getName() + " (" + taskCount + " " + getString(R.string.suffix_items) + ")" );
 		} else {
 			buffer.append( getString(R.string.title_allTasks));
 		}
@@ -435,7 +444,6 @@ public class MainActivity extends FragmentActivity  {
 		@Override
         public Fragment getItem(int position) {
 			ArrayList<Task> tasksToDisplay = getTaskListForPage( position );
-			mainActivity.setShareContent( tasksToDisplay ); // TODO: Determine if this is correct or if we should move this elswhere.
             ListFragment fragment = new ListFragment();
             Bundle args = new Bundle();
             args.putSerializable("tasks", tasksToDisplay);
