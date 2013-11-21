@@ -1,5 +1,6 @@
 package com.iceheart.listmanager;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -126,7 +128,7 @@ public class MainActivity extends FragmentActivity  {
 		onPageChangeListener.onPageSelected( 0 );
 		
         mViewPager.setOnPageChangeListener( onPageChangeListener );
-        
+
 	}
 	
 	public void refreshTaskList() {
@@ -165,12 +167,8 @@ public class MainActivity extends FragmentActivity  {
         
         MenuItem item = menu.findItem(R.id.share);
         mShareActionProvider = (ShareActionProvider) item.getActionProvider();
-        Intent shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent(tasks));
-        shareIntent.setType("text/plain");
-        mShareActionProvider.setShareIntent(shareIntent);
-        
+
+        setShareContent( tasks );
         return true;
     }
     
@@ -217,38 +215,68 @@ public class MainActivity extends FragmentActivity  {
 		}
 		
 		Intent sendIntent = new Intent();
-		sendIntent.setAction(Intent.ACTION_SEND);
-		sendIntent.putExtra(Intent.EXTRA_TEXT, getShareListContent(tasks) );
-		sendIntent.setType("text/plain");
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.setType("text/html");
+
+        String listName = getString(R.string.title_allTasks);
+        if ( selectedList != null ) {
+            listName = selectedList.getName();
+        }
+        String html = getShareListContent(tasks, listName);
+
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_title, listName ));
+        sendIntent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(html));
 		mShareActionProvider.setShareIntent(sendIntent);
 	}
 	
-	private String getShareListContent(List<Task> tasks) {
-		
-		// TODO: HTML CONTENT ?
+	private String getShareListContent(List<Task> tasks, String listName) {
 		
 		StringBuffer buffer = new StringBuffer();
+
 		int taskCount = tasks == null ? 0: tasks.size();
 		
 		if ( selectedList != null ) {
-			buffer.append( selectedList.getName() + " (" + taskCount + " " + getString(R.string.suffix_items) + ")" );
-		} else {
-			buffer.append( getString(R.string.title_allTasks));
-		}
-		buffer.append("\n\n");
+            buffer.append( " ==== ");
+			buffer.append( listName + (taskCount == 0 ? " (" + taskCount + " " + getString(R.string.suffix_items) + ")" : "") );
+            buffer.append( " ==== ");
+        }
+
+		buffer.append("<br/><br/>");
 		
 		if ( tasks != null ) {
-			for ( Task task: tasks ) {
-				if ( buffer.length() > 0 ) {
-					buffer.append( "\n" );
-				}
-				buffer.append( "- ");
-				buffer.append( task.getName() );
-			}
-			
+            for ( Task task: tasks ) {
+                String color = "#000000";
+
+                if ( task.isCompleted() ) {
+                    color = "#00ff00";
+                } else if ( task.isComingSoon() ) {
+                    color = "#ff0000";
+                }
+
+                buffer.append("<p>");
+                buffer.append("<b>"+task.getName()+"</b>:<br/>");
+                buffer.append("&nbsp;&nbsp;&nbsp;&nbsp;Due Date: <font color=\""+color+"\">"+task.getFormattedDueDate()+"</font><br/>");
+                BigDecimal estimatedPrice = task.getEstimatedPrice();
+                if ( estimatedPrice != null ) {
+                    buffer.append("&nbsp;&nbsp;&nbsp;&nbsp;Estimated Price: "+ estimatedPrice +" $<br/>");
+                }
+
+                BigDecimal realPrice = task.getRealPrice();
+                if ( realPrice != null ) {
+                    buffer.append("&nbsp;&nbsp;&nbsp;&nbsp;Real Price: "+ realPrice +" $<br/>");
+                }
+
+                buffer.append("</p>");
+
+                String notes = task.getNotes();
+                if ( notes != null ) {
+                    buffer.append("<p>");
+                    buffer.append("&nbsp;&nbsp;&nbsp;&nbsp;Notes:"+ notes +"<br/>");
+                    buffer.append("</p>");
+                }
+            }
 		}
 		return buffer.toString();
-		
 	}
 
     public TaskList getUserDefinedTaskListWithName( String name) {

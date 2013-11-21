@@ -49,6 +49,5 @@
     <string name="btn_delete">Delete</string>
     <string name="btn_showDetails">Edit</string>
     <string name="btn_update">Update</string>
-
-
+    <string name="email_title">Export of task list \'%1$s\'</string>
 </resources>
